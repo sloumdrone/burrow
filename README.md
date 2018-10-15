@@ -1,5 +1,7 @@
 # Digger
-A client with which to access _gopherspace_. It is under current early stage development.
+A client/browser that accesses _gopherspace_. It is under current early stage development.
+
+ ![Digger browser](http://brianmevans.com/files/digger.png "Digger v0.1.5 main window")
 
 ## Gopher
 [_Gopher_](https://en.wikipedia.org/wiki/Gopher_(protocol)) is a communications protocol that, in the early 90s, competed (briefly) with what became the world wide web. _Gopher_ serves up files and text based menus. As such, it is much lighter weight than HTML documents and the like served over http. Due to its text based nature it also has the benefit of being reliable in its visual output and style, and for being relatively accessible. 
