@@ -1,5 +1,5 @@
 # Digger
-A client with which to access _gopherspace_.
+A client with which to access _gopherspace_. It is under current early stage development.
 
 ## Gopher
 [_Gopher_](https://en.wikipedia.org/wiki/Gopher_(protocol)) is a communications protocol that, in the early 90s, competed (briefly) with what became the world wide web. _Gopher_ serves up files and text based menus. As such, it is much lighter weight than HTML documents and the like served over http. Due to its text based nature it also has the benefit of being reliable in its visual output and style, and for being relatively accessible. 
@@ -69,3 +69,8 @@ Once up an running you should be good to go.
 Digger's primary system target is linux. Once a version 1.0 is reached the plan is to distribute primarily through [Snapcraft](https://snapcraft.io/) packages. 
 
 Some version of windows executable may come along as well, depending on configurability of build tools (py2exe, freeze, etc) for windows executables and time.
+
+
+## Contribute
+
+To contribute, please branch off of `develop` and then submit a pull request into `develop` with any changes. As the project grows I will likely add wiki, issues, etc as the need arises and more people get involved.
