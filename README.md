@@ -10,12 +10,12 @@ The following is a list of current and future Digger features:
 - Tk based GUI
     - Back button, move backwards in session history
     - Forward button, move forward in session history
-    - Refresh button, will be replaced by a favorite button _(non-functional)_
-    - Home, shows favorites and is a start page _(non-functinoal)_
-    - An address bar, on __ENTER__ submits a request for a _gopher_ page
-    - Settings button _(non-functional)_
+    - Refresh button, will be replaced by a favorite button __(non-functional)__
+    - Home, shows favorites and is a start page __(non-functinoal)__
+    - An address bar, on _ENTER_ submits a request for a _gopher_ page
+    - Settings button __(non-functional)__
     - A display area for the requested information
-    - Scroll bar, scrolling works, but no bar is present _(non-functional)_
+    - Scroll bar, scrolling works, but no bar is present __(non-functional)__
     - A status bar to display various information
 - Links to menus and files
     - On hover, link destination shows in status bar
@@ -28,28 +28,28 @@ The following is a list of current and future Digger features:
 - Menus Pages and files
     - Menus display correctly and quickly
     - Text files display correctly and quickly
-    - Images files _(non-functional)_
-    - Sound files _(non-functional)_
-    - Binary files _(non-functional)_
-    - HTML files, will open in default browser _(non-functional)_
-    - Interactive pages/search _(non-functional)_
+    - Images files __(non-functional)__
+    - Sound files __(non-functional)__
+    - Binary files __(non-functional)__
+    - HTML files, will open in default browser __(non-functional)__
+    - Interactive pages/search __(non-functional)__
 - History
     - Session based history for backward and forward navigation
-    - Persistent favorites _(non-functional)_
-    - Suggestions on URL entry based on persistent history _(non-functional)_
+    - Persistent favorites __(non-functional)__
+    - Suggestions on URL entry based on persistent history __(non-functional)__
 - Application settings and menus
-    - Settings menu _(non-functional)_
+    - Settings menu __(non-functional)__
         - Color themes
         - Icon themes
         - History settings
         - Files/download settings
-    - Secondary click context menus for text manipulation & file saving _(non-functional)_
-    - Page saving for offline viewing _(non-functional)_
-    - Hotkey to view raw page source for menus _(non-functional)_
+    - Secondary click context menus for text manipulation & file saving __(non-functional)__
+    - Page saving for offline viewing __(non-functional)__
+    - Hotkey to view raw page source for menus __(non-functional)__
 - Errors
-    - Error warnings to user _(non-functional)_
-    - Error page on bad/malformed request _(non-functional)_
-    - Error display for type 3 server response _(non-functional)_
+    - Error warnings to user __(non-functional)__
+    - Error page on bad/malformed request __(non-functional)__
+    - Error display for type 3 server response __(non-functional)__
 
 
 ## Installation
