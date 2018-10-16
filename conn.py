@@ -15,7 +15,7 @@ class Tunnel:
             '5': None,
             '6': None,
             '7': '(INTER)',
-            '8': 'Telnet',
+            '8': '(TLNET)',
             '9': '(BIN)',
             '+': None,
             'g': '(GIF)',
@@ -38,25 +38,31 @@ class Tunnel:
         s.connect((host, port))
         s.sendall((resource + '\r\n').encode('utf-8'))
         r = s.makefile(mode = 'r')
-        raw_data = r.read()
+        try:
+            raw_data = r.read()
+        except UnicodeDecodeError:
+            raw_data = 'iError decoding server response :(\tfalse\tnull.host\t1'
+
         try:
             data = raw_data.decode('utf-8')
-        except AttributeError:
+        except:
             data = raw_data
+
         self.raw_request = data
         if itemtype[1] == '1':
             #handle menus
-            self.text_output = self.gopher_to_text()
+            self.text_output = self.gopher_to_text(self.raw_request)
         elif itemtype[1] == '0':
             #handle text files
             self.text_output = [self.raw_request]
         self.text_output.insert(0,itemtype[1])
         s.close()
+        return self.text_output
 
 
 
-    def gopher_to_text(self):
-        message = self.raw_request.split('\n')
+    def gopher_to_text(self, message):
+        message = message.split('\n')
         message = [x.split('\t') for x in message]
         message = [{'type': x[0][0], 'description': x[0][1:], 'resource': x[1], 'host': x[2], 'port': x[3]} for x in message if len(x) >= 4]
         return message

@@ -19,6 +19,7 @@ class GUI:
         self.HLB = '#e37800'
         self.HLF = 'white'
         self.STATUS = 'silver'
+        self.ERROR = 'red'
 
         #create and configure root window
         self.root = tk.Tk(className='Digger')
@@ -34,7 +35,7 @@ class GUI:
         #top bar objects
         self.btn_back = tk.Button(self.top_bar, image=self.img_back, bd=0, highlightthickness=0, takefocus=1)
         self.btn_forward = tk.Button(self.top_bar,image=self.img_forward, bd=0, highlightthickness=0)
-        self.btn_refresh = tk.Button(self.top_bar,image=self.img_refresh, bd=0, highlightthickness=0)
+        self.btn_favorite = tk.Button(self.top_bar,image=self.img_favorite, bd=0, highlightthickness=0)
         self.btn_home = tk.Button(self.top_bar, image=self.img_home, bd=0, highlightthickness=0)
         self.entry_url = tk.Entry(self.top_bar, selectbackground=self.HLB, selectforeground=self.HLF, highlightcolor=self.HLB)
         self.btn_menu = tk.Button(self.top_bar, image=self.img_menu, bd=0, highlightthickness=0)
@@ -43,6 +44,7 @@ class GUI:
         self.site_display = tk.Text(self.body, bg=self.BG, foreground=self.FG, padx=20, pady=20, wrap=tk.WORD, state=tk.DISABLED, spacing2=5, spacing1=5)
         self.site_display.tag_configure('linkcolor', foreground=self.LINK, spacing1=5)
         self.site_display.tag_configure('type_tag', background=self.FG, foreground=self.BG, spacing2=0, spacing1=0)
+        self.site_display.tag_configure('error_text', foreground=self.ERROR, spacing1=5, spacing2=5, spacing3=5)
 
         #status bar objects
         self.status_info = tk.Label(self.status_bar, textvariable=self.message_bar_content, bg=self.STATUS, takefocus=0)
@@ -51,13 +53,16 @@ class GUI:
         self.add_status_titles()
         self.add_event_listeners()
 
+        #load the home screen
+        self.load_home_screen()
+
         #---------------------------------------------------
 
     def add_event_listeners(self):
         buttons = [
             self.btn_back,
             self.btn_forward,
-            self.btn_refresh,
+            self.btn_favorite,
             self.btn_home,
             self.btn_menu
         ]
@@ -68,6 +73,7 @@ class GUI:
         self.entry_url.bind('<Return>', self.execute_address)
         self.btn_back.bind('<Button-1>', self.go_back)
         self.btn_forward.bind('<Button-1>', self.go_forward)
+        self.btn_home.bind('<Button-1>', self.load_home_screen)
 
 
     def pack_geometry(self):
@@ -77,10 +83,10 @@ class GUI:
         self.status_bar.pack(expand=False,fill=tk.X,side=tk.TOP,anchor=tk.SW)
         self.btn_back.pack(side=tk.LEFT, padx=(0,20))
         self.btn_forward.pack(side=tk.LEFT, padx=(0,20))
-        self.btn_refresh.pack(side=tk.LEFT, padx=(0,20))
         self.btn_home.pack(side=tk.LEFT, padx=(0,20))
         self.entry_url.pack(side=tk.LEFT, fill=tk.X, expand=True, ipady=10, ipadx=10)
-        self.btn_menu.pack(side=tk.LEFT, padx=(10,0))
+        self.btn_favorite.pack(side=tk.LEFT, padx=(10,10))
+        self.btn_menu.pack(side=tk.LEFT)
         self.site_display.pack(expand=True, side=tk.TOP, fill=tk.BOTH)
         self.status_info.pack(side=tk.LEFT)
 
@@ -88,7 +94,7 @@ class GUI:
     def add_status_titles(self):
         self.btn_back.pop_title = 'Back'
         self.btn_forward.pop_title = 'Forward'
-        self.btn_refresh.pop_title = 'Refresh'
+        self.btn_favorite.pop_title = 'Favorite'
         self.btn_home.pop_title = 'Home'
         self.btn_menu.pop_title = 'Menu'
 
@@ -96,7 +102,7 @@ class GUI:
     def add_assets(self):
         self.img_back = tk.PhotoImage(file='./btn_back.png')
         self.img_forward = tk.PhotoImage(file='./btn_forward.png')
-        self.img_refresh = tk.PhotoImage(file='./btn_refresh.png')
+        self.img_favorite = tk.PhotoImage(file='./btn_refresh.png')
         self.img_menu = tk.PhotoImage(file='./btn_menu.png')
         self.img_home = tk.PhotoImage(file='./btn_home.png')
         self.img_menu = tk.PhotoImage(file='./btn_menu.png')
@@ -108,9 +114,12 @@ class GUI:
         if btn_url and btn_url != -1:
             url = btn_url
         elif btn_url and btn_url == -1:
-            return
+            return False
         else:
             url = self.entry_url.get()
+            if url == 'home':
+                self.load_home_screen()
+                return True
             self.history = self.history[:self.history_location+1]
             self.history.append(url)
             self.history_location = len(self.history) - 1
@@ -118,6 +127,7 @@ class GUI:
         request = go()
         request.parse_url(url)
         self.send_to_screen(request.text_output)
+        return True
 
 
     def gotolink(self, event, href, tag_name):
@@ -138,21 +148,32 @@ class GUI:
         e.tag_config(tag_name, underline=1)
         e.update_idletasks()
 
+    def load_home_screen(self,event=False):
+        with open('./home.gopher','r') as f:
+            data = f.read()
+        parser = go()
+        data = parser.gopher_to_text(data)
+        data.insert(0,'1')
+        self.entry_url.delete(0, tk.END)
+        self.entry_url.insert(tk.END, 'home')
+        self.send_to_screen(data, True)
 
-    def send_to_screen(self, data):
+
+    def send_to_screen(self, data, clear=True):
         link_count = 0
         self.site_display.config(state=tk.NORMAL)
-        self.site_display.delete(1.0, tk.END)
+        if clear:
+            self.site_display.delete(1.0, tk.END)
         types = {
             '0': '( TEXT )',
             '1': '( MENU )',
             '2': None,
-            '3': 'Error code',
+            '3': '( ERROR)',
             '4': None,
             '5': None,
             '6': None,
             '7': '( INTR )',
-            '8': 'Telnet',
+            '8': '(TELNET)',
             '9': '( BIN  )',
             '+': None,
             'g': '( GIF  )',
@@ -165,9 +186,11 @@ class GUI:
 
         if data[0] == '0':
             self.site_display.insert(tk.END, data[1])
-        elif data[0] == '1':
+        elif data[0] in ['1','3']:
             for x in data[1:]:
                 if x['type'] == 'i':
+                    self.site_display.insert(tk.END,'        \t\t{}\n'.format(x['description']))
+                elif x['type'] == '3':
                     self.site_display.insert(tk.END,'        \t\t{}\n'.format(x['description']))
                 else:
                     # adapted from:
