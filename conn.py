@@ -30,25 +30,26 @@ class Tunnel:
     def make_connection(self, resource, host, itemtype, port=70):
         endline = '\r\n'
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        s.settimeout(20.0)
+        s.settimeout(30.0)
         try:
             port = int(port)
         except:
             port = 70
         s.connect((host, port))
         s.sendall((resource + '\r\n').encode('utf-8'))
-        r = s.makefile(mode = 'r')
+        r = s.makefile(mode = 'r', errors='ignore')
         try:
             raw_data = r.read()
         except UnicodeDecodeError:
             raw_data = 'iError decoding server response :(\tfalse\tnull.host\t1'
 
         try:
-            data = raw_data.decode('utf-8')
+            data = raw_data.decode('utf-8','ignore')
         except:
             data = raw_data
 
         self.raw_request = data
+
         if itemtype[1] == '1':
             #handle menus
             self.text_output = self.gopher_to_text(self.raw_request)
@@ -71,7 +72,6 @@ class Tunnel:
     def parse_url(self, url):
         regex = r'^(?P<protocol>(?:gopher:\/\/)?)?(?P<host>[\w\.\d]+)(?P<port>(?::\d+)?)?(?P<type>(?:\/\d)?)?(?P<resource>(?:\/[\w\/\d\-?.]*)?)?$'
         match = re.match(regex, url)
-
         protocol = match.group('protocol')
         itemtype = match.group('type')
         host = match.group('host')
