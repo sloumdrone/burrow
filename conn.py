@@ -69,7 +69,7 @@ class Tunnel:
         return message
 
 
-    def parse_url(self, url):
+    def parse_url(self, url, execute=True):
         regex = r'^(?P<protocol>(?:gopher:\/\/)?)?(?P<host>[\w\.\d]+)(?P<port>(?::\d+)?)?(?P<type>(?:\/\d)?)?(?P<resource>(?:\/[\w\/\d\-?.]*)?)?$'
         match = re.match(regex, url)
         protocol = match.group('protocol')
@@ -91,7 +91,10 @@ class Tunnel:
         if port:
             port = port[1:]
 
-        self.make_connection(resource, host, itemtype, port)
+        if execute:
+            self.make_connection(resource, host, itemtype, port)
+        else:
+            return {'host': host, 'resource': resource, 'type': itemtype}
 
 
 if __name__ == '__main__':

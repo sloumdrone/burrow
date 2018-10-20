@@ -4,12 +4,16 @@ import tkinter as tk
 from conn import Tunnel as go
 import time
 import sys
+import json
+import os.path
 
 class GUI:
     def __init__(self):
         self.history = []
         self.history_location = -1
         self.message_bar_content = ''
+        self.config = None
+        self.read_config()
 
         #colors
         self.FG = 'black'
@@ -41,7 +45,9 @@ class GUI:
         self.btn_menu = tk.Button(self.top_bar, image=self.img_menu, bd=0, highlightthickness=0)
 
         #body objects
-        self.site_display = tk.Text(self.body, bg=self.BG, foreground=self.FG, padx=20, pady=20, wrap=tk.WORD, state=tk.DISABLED, spacing2=5, spacing1=5)
+        self.scroll_bar = tk.Scrollbar(self.body)
+        self.site_display = tk.Text(self.body, bg=self.BG, foreground=self.FG, padx=20, pady=20, wrap=tk.WORD, state=tk.DISABLED, spacing2=5, spacing1=5, yscrollcommand=self.scroll_bar.set)
+        self.scroll_bar.config(command=self.site_display.yview, width=20, relief=tk.RIDGE)
         self.site_display.tag_configure('linkcolor', foreground=self.LINK, spacing1=5)
         self.site_display.tag_configure('type_tag', background=self.FG, foreground=self.BG, spacing2=0, spacing1=0)
         self.site_display.tag_configure('error_text', foreground=self.ERROR, spacing1=5, spacing2=5, spacing3=5)
@@ -74,6 +80,11 @@ class GUI:
         self.btn_back.bind('<Button-1>', self.go_back)
         self.btn_forward.bind('<Button-1>', self.go_forward)
         self.btn_home.bind('<Button-1>', self.load_home_screen)
+        self.site_display.bind("<Up>", lambda event: self.site_display.yview_scroll(-1, 'units'))
+        self.site_display.bind("<Down>", lambda event: self.site_display.yview_scroll(1, 'units'))
+        self.site_display.bind("<Button-1>", lambda event: self.site_display.focus_set())
+        self.entry_url.bind("<Button-1>", lambda event: self.entry_url.focus_set())
+        self.root.protocol('WM_DELETE_WINDOW', self.close_window)
 
 
     def pack_geometry(self):
@@ -87,6 +98,7 @@ class GUI:
         self.entry_url.pack(side=tk.LEFT, fill=tk.X, expand=True, ipady=10, ipadx=10)
         self.btn_favorite.pack(side=tk.LEFT, padx=(10,10))
         self.btn_menu.pack(side=tk.LEFT)
+        self.scroll_bar.pack(side=tk.RIGHT,fill=tk.Y)
         self.site_display.pack(expand=True, side=tk.TOP, fill=tk.BOTH)
         self.status_info.pack(side=tk.LEFT)
 
@@ -127,6 +139,7 @@ class GUI:
         request = go()
         request.parse_url(url)
         self.send_to_screen(request.text_output)
+        self.config["last_viewed"] = url
         return True
 
 
@@ -146,6 +159,7 @@ class GUI:
         self.update_status(event, href)
         e = event.widget
         e.tag_config(tag_name, underline=1)
+        self.site_display.config(cursor="arrow")
         e.update_idletasks()
 
     def load_home_screen(self,event=False):
@@ -157,6 +171,11 @@ class GUI:
         self.entry_url.delete(0, tk.END)
         self.entry_url.insert(tk.END, 'home')
         self.send_to_screen(data, True)
+
+    def load_favorites(self):
+        header = 'i#############\tfalse\tnull.host\t1\r\ni  manually edit in go.config.json\tfalse\tnull.host\t1\r\n or add using the favorites button\tfalse\tnull.host\t1\r\ni\tfalse\tnull.host\t1\r\n'
+        #soon add code to load in favorites here
+        self.send_to_screen(header, False)
 
 
     def send_to_screen(self, data, clear=True):
@@ -225,6 +244,7 @@ class GUI:
         if tag_name:
             e = event.widget
             e.tag_config(tag_name, underline=0)
+            self.site_display.config(cursor='xterm')
             e.update_idletasks()
         self.message_bar_content.set('')
 
@@ -249,6 +269,27 @@ class GUI:
         else:
             href = -1
         self.execute_address(False, href)
+
+    def read_config(self, url='./go.config.json'):
+        if not os.path.isfile(url):
+            self.create_config()
+        with open('./go.config.json', 'r') as f:
+            config = f.read()
+        config = json.loads(config)
+        self.config = config
+
+    def write_config(self, config, url='./go.config.json'):
+        with open(url, 'w') as f:
+            data = json.dumps(config)
+            f.write(data)
+
+    def create_config(self):
+        config = {"favorites": [],"last_viewed": None}
+        self.write_config(config)
+
+    def close_window(self):
+        self.write_config(self.config)
+        self.root.destroy()
 
 
 
