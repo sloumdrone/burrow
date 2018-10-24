@@ -28,18 +28,15 @@ class Tunnel:
 
 
     def make_connection(self, resource, host, itemtype, port=70):
-        endline = '\r\n'
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         s.settimeout(30.0)
-        try:
-            port = int(port)
-        except:
-            port = 70
         s.connect((host, port))
         s.sendall((resource + '\r\n').encode('utf-8'))
-        r = s.makefile(mode = 'r', errors='ignore')
+
+        req = s.makefile(mode = 'r', errors='ignore')
+
         try:
-            raw_data = r.read()
+            raw_data = req.read()
         except UnicodeDecodeError:
             raw_data = 'iError decoding server response :(\tfalse\tnull.host\t1'
 
@@ -62,39 +59,39 @@ class Tunnel:
 
 
 
-    def gopher_to_text(self, message):
-        message = message.split('\n')
-        message = [x.split('\t') for x in message]
-        message = [{'type': x[0][0], 'description': x[0][1:], 'resource': x[1], 'host': x[2], 'port': x[3]} for x in message if len(x) >= 4]
-        return message
+    # def gopher_to_text(self, message):
+    #     message = message.split('\n')
+    #     message = [x.split('\t') for x in message]
+    #     message = [{'type': x[0][0], 'description': x[0][1:], 'resource': x[1], 'host': x[2], 'port': x[3]} for x in message if len(x) >= 4]
+    #     return message
 
 
-    def parse_url(self, url, execute=True):
-        regex = r'^(?P<protocol>(?:gopher:\/\/)?)?(?P<host>[\w\.\d]+)(?P<port>(?::\d+)?)?(?P<type>(?:\/\d)?)?(?P<resource>(?:\/[\w\/\d\-?.]*)?)?$'
-        match = re.match(regex, url)
-        protocol = match.group('protocol')
-        itemtype = match.group('type')
-        host = match.group('host')
-        port = match.group('port')
-        resource = match.group('resource')
+    # def parse_url(self, url, execute=True):
+    #     regex = r'^(?P<protocol>(?:gopher:\/\/)?)?(?P<host>[\w\.\d]+)(?P<port>(?::\d+)?)?(?P<type>(?:\/\d)?)?(?P<resource>(?:\/[\w\/\d\-?.]*)?)?$'
+    #     match = re.match(regex, url)
+    #     protocol = match.group('protocol')
+    #     itemtype = match.group('type')
+    #     host = match.group('host')
+    #     port = match.group('port')
+    #     resource = match.group('resource')
 
-        if protocol != 'gopher://' and protocol:
-            return False
-        if itemtype and not self.types[itemtype[1]]:
-            return False
-        elif not itemtype:
-            itemtype = '/1'
-        if not host:
-            return False
-        if not resource:
-            resource = '/'
-        if port:
-            port = port[1:]
+    #     if protocol != 'gopher://' and protocol:
+    #         return False
+    #     if itemtype and not self.types[itemtype[1]]:
+    #         return False
+    #     elif not itemtype:
+    #         itemtype = '/1'
+    #     if not host:
+    #         return False
+    #     if not resource:
+    #         resource = '/'
+    #     if port:
+    #         port = port[1:]
 
-        if execute:
-            self.make_connection(resource, host, itemtype, port)
-        else:
-            return {'host': host, 'resource': resource, 'type': itemtype}
+    #     if execute:
+    #         self.make_connection(resource, host, itemtype, port)
+    #     else:
+    #         return {'host': host, 'resource': resource, 'type': itemtype}
 
 
 if __name__ == '__main__':
