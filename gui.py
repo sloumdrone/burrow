@@ -174,7 +174,6 @@ class GUI:
 
 
     def load_home_screen(self,event=None):
-        print('Loading home')
         with open('./home.gopher','r') as f:
             data = f.read()
         self.entry_url.delete(0, tk.END)
@@ -232,16 +231,15 @@ class GUI:
 
         if clear:
             self.site_display.delete(1.0, tk.END)
-        print('---------------')
-        print(data)
+
+        link_count = 0
+
         for x in data[1:]:
-            print(x)
             if x['type'] == 'i':
                 self.site_display.insert(tk.END,'        \t\t{}\n'.format(x['description']))
             elif x['type'] == '3':
                 self.site_display.insert(tk.END,'        \t\t{}\n'.format(x['description']))
             elif x['type'] in types:
-                link_count = 0
 
                 # adapted from:
                 # https://stackoverflow.com/questions/27760561/tkinter-and-hyperlinks
@@ -268,7 +266,6 @@ class GUI:
 
 
     def show_text(self, data):
-        print('Showing text')
         self.site_display.config(state=tk.NORMAL)
         self.site_display.delete(1.0, tk.END)
         self.site_display.insert(tk.END, data)
@@ -279,7 +276,6 @@ class GUI:
         if itemtype == '0':
             self.show_text(data)
         elif itemtype in ['1','3']:
-            print('got to menu call')
             data = self.parser.parse_menu(data)
             self.show_menu(data, clear)
 
