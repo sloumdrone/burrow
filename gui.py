@@ -49,10 +49,10 @@ class GUI:
 
         #body objects
         self.scroll_bar = tk.Scrollbar(self.body)
-        self.site_display = tk.Text(self.body, bg=self.BG, foreground=self.FG, padx=20, pady=20, wrap=tk.WORD, state=tk.DISABLED, spacing2=5, spacing1=5, yscrollcommand=self.scroll_bar.set)
+        self.site_display = tk.Text(self.body, bg=self.BG, foreground=self.FG, padx=20, pady=20, wrap=tk.WORD, state=tk.DISABLED, spacing2=2, spacing1=2, spacing3=2,  yscrollcommand=self.scroll_bar.set)
         self.scroll_bar.config(command=self.site_display.yview, width=20, relief=tk.RIDGE)
-        self.site_display.tag_configure('linkcolor', foreground=self.LINK, spacing1=5)
-        self.site_display.tag_configure('type_tag', background=self.FG, foreground=self.BG, spacing2=0, spacing1=0)
+        self.site_display.tag_configure('linkcolor', foreground=self.LINK, spacing1=5, spacing2=5, spacing3=5)
+        self.site_display.tag_configure('type_tag', background=self.FG, foreground=self.BG, spacing2=1, spacing1=1, spacing3=1)
         self.site_display.tag_configure('error_text', foreground=self.ERROR, spacing1=5, spacing2=5, spacing3=5)
 
         #status bar objects
@@ -63,7 +63,7 @@ class GUI:
         self.add_event_listeners()
 
         #load the home screen
-        self.load_home_screen()
+        self.load_home_screen(1)
 
     #-----------Start GUI configuration-----------------------
 
@@ -131,7 +131,7 @@ class GUI:
     def execute_address(self, event=False, btn_url=False, history=True):
         url = btn_url if btn_url else self.entry_url.get()
         if url == 'home':
-            adjust_history = 1 if btn_url else None
+            adjust_history = None if btn_url else 1
             self.load_home_screen(adjust_history)
             return True
 
@@ -186,7 +186,7 @@ class GUI:
             data = f.read()
         self.entry_url.delete(0, tk.END)
         self.entry_url.insert(tk.END, 'home')
-        if event is None:
+        if event is not None:
             self.add_to_history('home')
         self.send_to_screen(data, '1')
 
