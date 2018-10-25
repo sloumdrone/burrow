@@ -131,7 +131,8 @@ class GUI:
     def execute_address(self, event=False, btn_url=False, history=True):
         url = btn_url if btn_url else self.entry_url.get()
         if url == 'home':
-            self.load_home_screen()
+            adjust_history = 1 if btn_url else None
+            self.load_home_screen(adjust_history)
             return True
 
         parsed_url = self.parser.parse_url(url)
@@ -161,6 +162,13 @@ class GUI:
         return True
 
 
+    def add_to_history(self, url):
+        self.history = self.history[:self.history_location+1]
+        self.history.append(url)
+        self.history_location = len(self.history) - 1
+
+
+
     def gotolink(self, event, href, tag_name):
         element = event.widget
         element.tag_config(tag_name, background=self.ACTIVELINK)
@@ -178,11 +186,13 @@ class GUI:
             data = f.read()
         self.entry_url.delete(0, tk.END)
         self.entry_url.insert(tk.END, 'home')
+        if event is None:
+            self.add_to_history('home')
         self.send_to_screen(data, '1')
 
 
     def go_back(self, event):
-        if len(self.history) <= 1 and self.history_location <= 0:
+        if len(self.history) <= 1 or self.history_location <= 0:
             return False
 
         self.history_location -= 1
@@ -192,7 +202,7 @@ class GUI:
 
 
     def go_forward(self, event):
-        if len(self.history) <= 1 and self.history_location >= len(self.history) - 1:
+        if len(self.history) <= 1 or self.history_location >= len(self.history) - 1:
             return False
 
         self.history_location += 1
