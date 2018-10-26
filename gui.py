@@ -7,6 +7,8 @@ import time
 import sys
 import json
 import os.path
+from io import BytesIO
+from PIL import Image, ImageTk
 
 class GUI:
     def __init__(self):
@@ -136,6 +138,7 @@ class GUI:
             return True
 
         parsed_url = self.parser.parse_url(url)
+        print(parsed_url)
 
         if not parsed_url:
             # To do: build errors class to handle displaying errors
@@ -225,16 +228,17 @@ class GUI:
             return False
 
         types = {
-                    '0': '( TEXT )',
-                    '1': '( MENU )',
-                    '3': '( ERROR)',
-                    '7': '( INTR )',
-                    '9': '( BIN  )',
-                    'g': '( GIF  )',
-                    'I': '( IMG  )',
-                    'h': '( HTML )',
-                    'i': '( INFO )',
-                    's': '( SOUND)'
+                    '0': '( TXT )',
+                    '1': '( MNU )',
+                    '3': '( ERR )',
+                    '7': '( INT )',
+                    '9': '( BIN )',
+                    'g': '( GIF )',
+                    'I': '( IMG )',
+                    'h': '( HTM )',
+                    'i': '( INF )',
+                    's': '( SND )',
+                    'p': '( PNG )'
                 }
 
         self.site_display.config(state=tk.NORMAL)
@@ -282,12 +286,22 @@ class GUI:
         self.site_display.config(state=tk.DISABLED)
 
 
+    def show_image(self, data):
+        self.current_image = self.build_image(data)
+        self.site_display.config(state=tk.NORMAL)
+        self.site_display.delete(1.0, tk.END)
+        self.site_display.image_create(tk.END, image = self.current_image)
+        self.site_display.config(state=tk.DISABLED)
+
+
     def send_to_screen(self, data, itemtype='1', clear=True):
         if itemtype == '0':
             self.show_text(data)
         elif itemtype in ['1','3']:
             data = self.parser.parse_menu(data)
             self.show_menu(data, clear)
+        elif itemtype in ['p','I','g']:
+            self.show_image(data)
 
 
     def update_status(self, event, href=False):
@@ -317,6 +331,14 @@ class GUI:
         e.tag_config(tag_name, underline=1)
         self.site_display.config(cursor="arrow")
         e.update_idletasks()
+
+    def build_image(self, bytes_str):
+        stream = BytesIO(bytes_str)
+        print(type(stream))
+        pilimage = Image.open(stream)
+        tkimage = ImageTk.PhotoImage(pilimage)
+        return tkimage
+
 
 
     #--------Start file handling methods------------

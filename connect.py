@@ -12,7 +12,11 @@ class connect:
         socket_conn.connect((host, port))
         socket_conn.sendall((resource + '\r\n').encode('utf-8'))
 
-        response = socket_conn.makefile(mode = 'r', errors = 'ignore')
+        if itemtype in ['I','p','g']:
+            response = socket_conn.makefile(mode = 'rb', errors = 'ignore')
+        else:
+            response = socket_conn.makefile(mode = 'r', errors = 'ignore')
+
         try:
             self.raw_response = response.read()
             self.filetype = itemtype
