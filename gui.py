@@ -21,14 +21,23 @@ class GUI:
         self.parser = parser()
 
         #colors
-        self.FG = 'black'
-        self.BG = 'white'
-        self.LINK = 'blue'
-        self.ACTIVELINK = 'red'
-        self.HLB = '#e37800'
-        self.HLF = 'white'
-        self.STATUS = 'silver'
-        self.ERROR = 'red'
+        self.FG = '#E0E2E4'
+        self.BG = '#2F393C'
+        self.LINK = '#E8E2B7'
+        self.ACTIVELINK = '#678CB1'
+        self.HLB = '#804000'
+        self.HLF = '#E0E2E4'
+        self.STATUS_BG = '#293134'
+        self.STATUS_FG = '#FFCD22'
+        self.ERROR = '#E8E2B7'
+        self.BAR_BG = '#293134'
+        self.BAR_FG = '#2F393C'
+        self.BAR_HLB = '#804000'
+        self.BAR_HLF = '#E0E2E4'
+        self.BAR_SLOT = '#E0E2E4'
+        self.SCROLL = '#434A57'
+        self.TYPES = '#A082BD'
+
 
         #create and configure root window
         self.root = tk.Tk(className='Digger')
@@ -37,28 +46,28 @@ class GUI:
         self.add_assets()
 
         #main frame objects
-        self.top_bar = tk.Frame(self.root, padx=10, height=70, relief=tk.FLAT, bd=2)
-        self.body = tk.Frame(self.root, relief=tk.RIDGE, bd=2)
-        self.status_bar = tk.Frame(self.root, height="20", bg=self.STATUS, takefocus=0)
+        self.top_bar = tk.Frame(self.root, padx=10, height=50, relief=tk.FLAT, bd=2, bg=self.BAR_BG)
+        self.body = tk.Frame(self.root, relief=tk.FLAT, bd=0, bg=self.BG)
+        self.status_bar = tk.Frame(self.root, height="20", relief=tk.FLAT, bg=self.STATUS_BG, takefocus=0)
 
         #top bar objects
-        self.btn_back = tk.Button(self.top_bar, image=self.img_back, bd=0, highlightthickness=0, takefocus=1)
-        self.btn_forward = tk.Button(self.top_bar,image=self.img_forward, bd=0, highlightthickness=0)
-        self.btn_favorite = tk.Button(self.top_bar,image=self.img_favorite, bd=0, highlightthickness=0)
-        self.btn_home = tk.Button(self.top_bar, image=self.img_home, bd=0, highlightthickness=0)
-        self.entry_url = tk.Entry(self.top_bar, selectbackground=self.HLB, selectforeground=self.HLF, highlightcolor=self.HLB)
-        self.btn_menu = tk.Button(self.top_bar, image=self.img_menu, bd=0, highlightthickness=0)
+        self.btn_back = tk.Button(self.top_bar, image=self.img_back, bd=0, highlightthickness=0, takefocus=1, bg=self.BAR_BG)
+        self.btn_forward = tk.Button(self.top_bar,image=self.img_forward, bd=0, highlightthickness=0, bg=self.BAR_BG)
+        self.btn_favorite = tk.Button(self.top_bar,image=self.img_favorite, bd=0, highlightthickness=0, bg=self.BAR_BG)
+        self.btn_home = tk.Button(self.top_bar, image=self.img_home, bd=0, highlightthickness=0, bg=self.BAR_BG)
+        self.entry_url = tk.Entry(self.top_bar, selectbackground=self.HLB, selectforeground=self.HLF, highlightcolor=self.FG, highlightbackground=self.BAR_BG,  fg=self.BAR_FG, bg=self.BAR_SLOT)
+        self.btn_menu = tk.Button(self.top_bar, image=self.img_menu, bd=0, highlightthickness=0, bg=self.BAR_BG)
 
         #body objects
-        self.scroll_bar = tk.Scrollbar(self.body)
-        self.site_display = tk.Text(self.body, bg=self.BG, foreground=self.FG, padx=20, pady=20, wrap=tk.WORD, state=tk.DISABLED, spacing2=2, spacing1=2, spacing3=2,  yscrollcommand=self.scroll_bar.set)
+        self.scroll_bar = tk.Scrollbar(self.body, bg=self.BAR_BG, bd=0, highlightthickness=0, troughcolor=self.BG, activebackground=self.SCROLL, activerelief=tk.RAISED)
+        self.site_display = tk.Text(self.body, bg=self.BG, foreground=self.FG, padx=20, pady=20, wrap=tk.WORD, state=tk.DISABLED, spacing2=2, spacing1=2, spacing3=2,  yscrollcommand=self.scroll_bar.set, highlightcolor=self.BG, highlightbackground=self.BAR_BG, relief=tk.FLAT)
         self.scroll_bar.config(command=self.site_display.yview, width=20, relief=tk.RIDGE)
         self.site_display.tag_configure('linkcolor', foreground=self.LINK, spacing1=5, spacing2=5, spacing3=5)
-        self.site_display.tag_configure('type_tag', background=self.FG, foreground=self.BG, spacing2=1, spacing1=1, spacing3=1)
+        self.site_display.tag_configure('type_tag', background=self.BG, foreground=self.TYPES, spacing2=1, spacing1=1, spacing3=1)
         self.site_display.tag_configure('error_text', foreground=self.ERROR, spacing1=5, spacing2=5, spacing3=5)
 
         #status bar objects
-        self.status_info = tk.Label(self.status_bar, textvariable=self.message_bar_content, bg=self.STATUS, takefocus=0)
+        self.status_info = tk.Label(self.status_bar, textvariable=self.message_bar_content, bg=self.STATUS_BG, takefocus=0, fg=self.ACTIVELINK)
 
         self.pack_geometry()
         self.add_status_titles()
@@ -81,6 +90,7 @@ class GUI:
         for x in buttons:
             x.bind('<Enter>', self.update_status)
             x.bind('<Leave>', self.clear_status)
+            x.config(activebackground=self.BG)
         self.entry_url.bind('<Return>', self.execute_address)
         self.btn_back.bind('<Button-1>', self.go_back)
         self.btn_forward.bind('<Button-1>', self.go_forward)
@@ -100,7 +110,7 @@ class GUI:
         self.btn_back.pack(side=tk.LEFT, padx=(0,20))
         self.btn_forward.pack(side=tk.LEFT, padx=(0,20))
         self.btn_home.pack(side=tk.LEFT, padx=(0,20))
-        self.entry_url.pack(side=tk.LEFT, fill=tk.X, expand=True, ipady=10, ipadx=10)
+        self.entry_url.pack(side=tk.LEFT, fill=tk.X, expand=True, ipady=5, ipadx=10)
         self.btn_favorite.pack(side=tk.LEFT, padx=(10,10))
         self.btn_menu.pack(side=tk.LEFT)
         self.scroll_bar.pack(side=tk.RIGHT,fill=tk.Y)
@@ -117,12 +127,11 @@ class GUI:
 
 
     def add_assets(self):
-        self.img_back = tk.PhotoImage(file='./btn_back.png')
-        self.img_forward = tk.PhotoImage(file='./btn_forward.png')
-        self.img_favorite = tk.PhotoImage(file='./btn_refresh.png')
-        self.img_menu = tk.PhotoImage(file='./btn_menu.png')
-        self.img_home = tk.PhotoImage(file='./btn_home.png')
-        self.img_menu = tk.PhotoImage(file='./btn_menu.png')
+        self.img_back = tk.PhotoImage(file='./images/back.png')
+        self.img_forward = tk.PhotoImage(file='./images/forward.png')
+        self.img_favorite = tk.PhotoImage(file='./images/favorite.png')
+        self.img_home = tk.PhotoImage(file='./images/home.png')
+        self.img_menu = tk.PhotoImage(file='./images/settings.png')
         self.message_bar_content = tk.StringVar()
         self.message_bar_content.set('Ready.')
 
@@ -138,12 +147,14 @@ class GUI:
             return True
 
         parsed_url = self.parser.parse_url(url)
-        print(parsed_url)
 
         if not parsed_url:
             # To do: build errors class to handle displaying errors
             # return errors.url_error
             return False
+
+        if parsed_url['type'] == '7':
+            self.send_to_screen(parsed_url, parsed_url['type'])
 
         response = self.conn.request(self.parser.resource, self.parser.host, self.parser.filetype, self.parser.port)
 
@@ -282,7 +293,7 @@ class GUI:
     def show_text(self, data):
         self.site_display.config(state=tk.NORMAL)
         self.site_display.delete(1.0, tk.END)
-        self.site_display.insert(tk.END, data)
+        self.site_display.insert(tk.END, data[:-2])
         self.site_display.config(state=tk.DISABLED)
 
 
@@ -302,6 +313,8 @@ class GUI:
             self.show_menu(data, clear)
         elif itemtype in ['p','I','g']:
             self.show_image(data)
+        elif itemtype == '7':
+            pass
 
 
     def update_status(self, event, href=False):
@@ -328,13 +341,12 @@ class GUI:
     def hoverlink(self, event, href, tag_name):
         self.update_status(event, href)
         e = event.widget
-        e.tag_config(tag_name, underline=1)
+        e.tag_config(tag_name, underline=1, foreground=self.LINK)
         self.site_display.config(cursor="arrow")
         e.update_idletasks()
 
     def build_image(self, bytes_str):
         stream = BytesIO(bytes_str)
-        print(type(stream))
         pilimage = Image.open(stream)
         tkimage = ImageTk.PhotoImage(pilimage)
         return tkimage
