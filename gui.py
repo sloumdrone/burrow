@@ -9,6 +9,7 @@ import json
 import os.path
 from io import BytesIO
 from PIL import Image, ImageTk
+import webbrowser as wb
 
 class GUI:
     def __init__(self):
@@ -40,8 +41,8 @@ class GUI:
 
 
         #create and configure root window
-        self.root = tk.Tk(className='Digger')
-        self.root.title('Digger')
+        self.root = tk.Tk(className='Burrow')
+        self.root.title('Burrow')
         self.root.geometry("1200x800")
         self.add_assets()
 
@@ -153,6 +154,7 @@ class GUI:
             # return errors.url_error
             return False
 
+
         if parsed_url['type'] == '7':
             self.send_to_screen(parsed_url, parsed_url['type'])
 
@@ -184,6 +186,9 @@ class GUI:
 
 
     def gotolink(self, event, href, tag_name):
+        if href[:4] == 'http':
+            wb.open(href, 2, True)
+            return True
         element = event.widget
         element.tag_config(tag_name, background=self.ACTIVELINK)
         element.update_idletasks()  # make sure change is visible
@@ -271,7 +276,12 @@ class GUI:
                 if x['port'] and x['port'][0] != ':':
                     x['port'] = ':{}'.format(x['port'])
 
-                link = 'gopher://{}{}/{}{}'.format(x['host'], x['port'], x['type'], x['resource'])
+                if x['type'] == 'h':
+                    link = '{}/{}'.format(x['host'], x['resource'])
+                    link = 'http://{}'.format(link.replace('//','/'))
+                else:
+                    link = 'gopher://{}{}/{}{}'.format(x['host'], x['port'], x['type'], x['resource'])
+
                 tag_name = 'link{}'.format(link_count)
                 callback = (lambda event, href=link, tag_name=tag_name: self.gotolink(event, href, tag_name))
                 hover = (lambda event, href=link, tag_name=tag_name: self.hoverlink(event, href, tag_name))
