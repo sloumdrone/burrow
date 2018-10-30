@@ -1,23 +1,23 @@
-# Digger
+# Burrow
 A client/browser that accesses _gopherspace_. It is under current early stage development.
 
- ![Digger browser](http://brianmevans.com/files/digger.png "Digger v0.1.5 main window")
+ ![Burrow browser](http://brianmevans.com/files/digger.png "Burrow v0.1.5 main window")
 
 ## Gopher
 [_Gopher_](https://en.wikipedia.org/wiki/Gopher_(protocol)) is a communications protocol that, in the early 90s, competed (briefly) with what became the world wide web. _Gopher_ serves up files and text based menus. As such, it is much lighter weight than HTML documents and the like served over http. Due to its text based nature it also has the benefit of being reliable in its visual output and style, and for being relatively accessible. 
 
-## Digger
-The following is a list of current and future Digger features:
+## Browser Features
+The following is a list of current and future Burrow features:
 
 - Tk based GUI
     - Back button, move backwards in session history
     - Forward button, move forward in session history
     - Refresh button, will be replaced by a favorite button __(non-functional)__
-    - Home, shows favorites and is a start page __(non-functinoal)__
+    - Home, shows favorites and is a start page
     - An address bar, on _ENTER_ submits a request for a _gopher_ page
     - Settings button __(non-functional)__
     - A display area for the requested information
-    - Scroll bar, scrolling works, but no bar is present __(non-functional)__
+    - Scroll bar
     - A status bar to display various information
 - Links to menus and files
     - On hover, link destination shows in status bar
@@ -30,7 +30,7 @@ The following is a list of current and future Digger features:
 - Menus Pages and files
     - Menus display correctly and quickly
     - Text files display correctly and quickly
-    - Images files __(non-functional)__
+    - Images files
     - Sound files __(non-functional)__
     - Binary files __(non-functional)__
     - HTML files, will open in default browser __(non-functional)__
@@ -56,19 +56,22 @@ The following is a list of current and future Digger features:
 
 ## Installation
 
-Digger requires python3 to be installed on the system prior to running.
-    # can be prefixed with python3
-    # but not required if you have python3 installed
-    /path/to/digger.py
+Burrow requires python3 to be installed on the system prior to running.
+Until some bundling/setup file creation occurs, you will also need to add:
+
+    pip3 install pillow
+    
+
 On some linux distributions an additional package for tkinter may be required.
 If you get a console error complaining about tkinter try the following (or equivalent for your package manager):
-    sudo apt-get python3-tk
-Once up an running you should be good to go.
 
+    sudo apt-get install python3-tk
+    sudo apt-get install python3-pil.imagetk
+    
 
 ## Distribution
 
-Digger's primary system target is linux. Once a version 1.0 is reached the plan is to distribute primarily through [Snapcraft](https://snapcraft.io/) packages. 
+Burrow's primary system target is linux. Once a version 1.0 is reached the plan is to distribute primarily through [Snapcraft](https://snapcraft.io/) packages. 
 
 Some version of windows executable may come along as well, depending on configurability of build tools (py2exe, freeze, etc) for windows executables and time.
 
