@@ -16,7 +16,7 @@ class parser:
     def parse_url(self, url):
         # Take in a URL and output a dict of the url parts
 
-        regex = r'^(?P<protocol>(?:(gopher|http):\/\/)?)?(?P<host>[\w\.\d]+)(?P<port>(?::\d+)?)?(?P<type>(?:\/[\dgIp])?)?(?P<resource>(?:\/\S*)?)?$'
+        regex = r'^(?P<protocol>(?:(gopher|http):\/\/)?)?(?P<host>[\w\.\d]+)(?P<port>(?::\d+)?)?(?P<type>(?:\/[\dgIp])?)?(?P<resource>(?:\/.*)?)?$'
 
         match = re.match(regex, url)
         protocol = match.group('protocol')

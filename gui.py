@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import tkinter as tk
+from tkinter import simpledialog as sdb
 from connect import connect as conn
 from parser import parser
 import time
@@ -156,7 +157,14 @@ class GUI:
 
 
         if parsed_url['type'] == '7':
-            self.send_to_screen(parsed_url, parsed_url['type'])
+            # self.send_to_screen(parsed_url, parsed_url['type'])
+            terms = sdb.askstring('Search','Please enter your search terms...')
+            print(terms)
+            if terms:
+                self.parser.resource = "{}\t{}".format(self.parser.resource,terms)
+                print(self.parser.resource)
+            else:
+                return False
 
         response = self.conn.request(self.parser.resource, self.parser.host, self.parser.filetype, self.parser.port)
 
@@ -318,13 +326,11 @@ class GUI:
     def send_to_screen(self, data, itemtype='1', clear=True):
         if itemtype == '0':
             self.show_text(data)
-        elif itemtype in ['1','3']:
+        elif itemtype in ['1','3','7']:
             data = self.parser.parse_menu(data)
             self.show_menu(data, clear)
         elif itemtype in ['p','I','g']:
             self.show_image(data)
-        elif itemtype == '7':
-            pass
 
 
     def update_status(self, event, href=False):
