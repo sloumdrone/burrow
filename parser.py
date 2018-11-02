@@ -19,6 +19,10 @@ class parser:
         regex = r'^(?P<protocol>(?:(gopher|http):\/\/)?)?(?P<host>[\w\.\d]+)(?P<port>(?::\d+)?)?(?P<type>(?:\/[\dgIp])?)?(?P<resource>(?:\/.*)?)?$'
 
         match = re.match(regex, url)
+
+        if not match:
+            return False
+
         protocol = match.group('protocol')
         itemtype = match.group('type')
         host = match.group('host')

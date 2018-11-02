@@ -93,7 +93,7 @@ class GUI:
             x.bind('<Enter>', self.update_status)
             x.bind('<Leave>', self.clear_status)
             x.config(activebackground=self.BG)
-        self.entry_url.bind('<Return>', self.execute_address)
+        self.entry_url.bind('<Return>', self.handle_request)
         self.btn_back.bind('<Button-1>', self.go_back)
         self.btn_forward.bind('<Button-1>', self.go_forward)
         self.btn_home.bind('<Button-1>', self.load_home_screen)
@@ -140,43 +140,59 @@ class GUI:
 
     # ------------Start navigation methods----------------------------
 
+    def handle_request(self,event=False, url=False, history=True):
+        parsed_url = self.parse_url(url)
+        if not parsed_url:
+            if url == 'home':
+                return self.load_home_screen(history)
+            else:
+                return False #error handling goes here
 
-    def execute_address(self, event=False, btn_url=False, history=True):
-        url = btn_url if btn_url else self.entry_url.get()
-        if url == 'home':
-            adjust_history = None if btn_url else 1
-            self.load_home_screen(adjust_history)
-            return True
+        if parsed_url['type'] == 7:
+            return False # display search
+        else:
+            data = self.execute_address(parsed_url)
+            if not data:
+                return False #error handling goes here
+
+        self.populate_url_bar(url)
+
+        if history:
+            self.add_to_history(url)
+
+        self.send_to_screen(self.conn.raw_response,self.conn.filetype)
+
+
+    def parse_url(self, url=False, history=True):
+        url = url if url else self.entry_url.get()
 
         parsed_url = self.parser.parse_url(url)
 
         if not parsed_url:
-            # To do: build errors class to handle displaying errors
-            # return errors.url_error
+            # send error to screen
+            print('Error parsing URL')
             return False
 
+        return parsed_url
 
-        if parsed_url['type'] == '7':
-            # self.send_to_screen(parsed_url, parsed_url['type'])
-            terms = sdb.askstring('Search','Please enter your search terms...')
-            print(terms)
-            if terms:
-                self.parser.resource = "{}\t{}".format(self.parser.resource,terms)
-                print(self.parser.resource)
-            else:
-                return False
 
-        response = self.conn.request(self.parser.resource, self.parser.host, self.parser.filetype, self.parser.port)
+    def execute_address(self, url):
+        # if parsed_url['type'] == '7':
+        #     # self.send_to_screen(parsed_url, parsed_url['type'])
+        #     terms = sdb.askstring('Search','Please enter your search terms...')
+        #     print(terms)
+        #     if terms:
+        #         self.parser.resource = "{}\t{}".format(self.parser.resource,terms)
+        #         print(self.parser.resource)
+        #     else:
+        #         return False
+
+        response = self.conn.request(url['resource'], url['host'], url['type'], url['port'])
 
         if not response:
-            # To do: build errors class to handle displaying errors
-            # return errors.connection_error_NUMBER
+            # send error to screen
             return False
 
-        if history:
-            self.history = self.history[:self.history_location+1]
-            self.history.append(url)
-            self.history_location = len(self.history) - 1
 
         # Get the data to the screen
         self.site_display.focus_set()
@@ -201,19 +217,17 @@ class GUI:
         element.tag_config(tag_name, background=self.ACTIVELINK)
         element.update_idletasks()  # make sure change is visible
         time.sleep(.5)  # optional delay to show changed text
-        self.entry_url.delete(0,tk.END)
-        self.entry_url.insert(tk.END,href)
-        success = self.execute_address()
         element.tag_config(tag_name, background=self.BG)  # restore tag text style
         element.update_idletasks()
+        self.handle_request(False,href)
 
 
-    def load_home_screen(self,event=None):
+    def load_home_screen(self,event=False):
         with open('./home.gopher','r') as f:
             data = f.read()
         self.entry_url.delete(0, tk.END)
         self.entry_url.insert(tk.END, 'home')
-        if event is not None:
+        if event is not False:
             self.add_to_history('home')
         self.send_to_screen(data, '1')
 
@@ -224,8 +238,7 @@ class GUI:
 
         self.history_location -= 1
         href = self.history[self.history_location]
-        self.populate_url_bar(href)
-        self.execute_address(False, href, False)
+        self.handle_request(False, href, False)
 
 
     def go_forward(self, event):
@@ -234,8 +247,7 @@ class GUI:
 
         self.history_location += 1
         href = self.history[self.history_location]
-        self.populate_url_bar(href)
-        self.execute_address(False, href, False)
+        self.handle_request(False, href, False)
 
 
     #-------------Start view methods----------------

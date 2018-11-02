@@ -8,14 +8,18 @@ class connect:
     def request(self, resource, host, itemtype, port=70):
         #connects to server and returns list with response type and body
         socket_conn = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        socket_conn.settimeout(20.0)
-        socket_conn.connect((host, port))
-        socket_conn.sendall((resource + '\r\n').encode('utf-8'))
 
-        if itemtype in ['I','p','g']:
-            response = socket_conn.makefile(mode = 'rb', errors = 'ignore')
-        else:
-            response = socket_conn.makefile(mode = 'r', errors = 'ignore')
+        try:
+            socket_conn.connect((host, port))
+            socket_conn.sendall((resource + '\r\n').encode('utf-8'))
+
+            if itemtype in ['I','p','g']:
+                response = socket_conn.makefile(mode = 'rb', errors = 'ignore')
+            else:
+                response = socket_conn.makefile(mode = 'r', errors = 'ignore')
+        except:
+            socket_conn.close()
+            return False
 
         try:
             self.raw_response = response.read()
