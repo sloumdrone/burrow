@@ -15,6 +15,8 @@ class parser:
 
     def parse_url(self, url):
         # Take in a URL and output a dict of the url parts
+        if url == 'home':
+            return False
 
         regex = r'^(?P<protocol>(?:(gopher|http):\/\/)?)?(?P<host>[\w\.\d]+)(?P<port>(?::\d+)?)?(?P<type>(?:\/[\dgIp])?)?(?P<resource>(?:\/.*)?)?$'
 
@@ -23,13 +25,13 @@ class parser:
         if not match:
             return False
 
-        protocol = match.group('protocol')
-        itemtype = match.group('type')
-        host = match.group('host')
-        port = match.group('port')
-        resource = match.group('resource')
-
-        if not host:
+        try:
+            protocol = match.group('protocol')
+            itemtype = match.group('type')
+            host = match.group('host')
+            port = match.group('port')
+            resource = match.group('resource')
+        except:
             return False
 
         if not resource:
