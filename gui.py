@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import tkinter as tk
+import tkinter.simpledialog as dialog
 from connect import connect as conn
 from parser import parser
 import time
@@ -102,6 +103,7 @@ class GUI:
         self.site_display.bind("<Button-1>", lambda event: self.site_display.focus_set())
         self.entry_url.bind("<Button-1>", lambda event: self.entry_url.focus_set())
         self.root.protocol('WM_DELETE_WINDOW', self.close_window)
+        self.btn_favorite.bind("<Button-1>", self.add_to_favorites)
 
 
     def pack_geometry(self):
@@ -216,10 +218,12 @@ class GUI:
     def load_home_screen(self,event=False):
         with open('./home.gopher','r') as f:
             data = f.read()
+            print(data)
         self.entry_url.delete(0, tk.END)
         self.entry_url.insert(tk.END, 'home')
         if event:
             self.add_to_history('home')
+        data += self.load_favorites()
         self.send_to_screen(data, '1')
 
 
@@ -241,13 +245,31 @@ class GUI:
         self.handle_request(False, href, False)
 
 
+    def add_to_favorites(self, event):
+        favorite_name = dialog.askstring("Add to favorites", "What would you like to title this favorite?")
+        url = self.entry_url.get()
+        if not favorite_name or not url:
+            return False
+        favorite = {"url": url, "name": favorite_name}
+        self.config["favorites"].append(favorite)
+        self.write_config(self.config)
+
+
+
     #-------------Start view methods----------------
 
 
     def load_favorites(self):
-        header = 'i#############\tfalse\tnull.host\t1\r\ni  manually edit in go.config.json\tfalse\tnull.host\t1\r\n or add using the favorites button\tfalse\tnull.host\t1\r\ni\tfalse\tnull.host\t1\r\n'
+        header = ''
         #soon add code to load in favorites here
-        self.send_to_screen(data=header, clear=False)
+        for x in self.config["favorites"]:
+            url = self.parser.parse_url(x["url"])
+            if not url:
+                continue
+            entry = '{}{}\t{}\t{}\t{}\n'.format(url['type'], x['name'], url['resource'], url['host'], url['port'])
+            header += entry
+        return header
+        # self.send_to_screen(data=header, clear=False)
 
     def show_search(self):
         text1 = ' __   ___       __   __\n/__` |__   /\  |__) /  ` |__|\n.__/ |___ /~~\ |  \ \__, |  |\n\n\nPlease enter your search terms and press the enter key:\n\n'
@@ -303,7 +325,6 @@ class GUI:
             elif x['type'] == '3':
                 self.site_display.insert(tk.END,'        \t\t{}\n'.format(x['description']))
             elif x['type'] in types:
-
                 # adapted from:
                 # https://stackoverflow.com/questions/27760561/tkinter-and-hyperlinks
                 if x['port'] and x['port'][0] != ':':
@@ -334,9 +355,11 @@ class GUI:
 
 
     def show_text(self, data):
+        if data[-2:] == '\n.':
+            data = data[:-2]
         self.site_display.config(state=tk.NORMAL)
         self.site_display.delete(1.0, tk.END)
-        self.site_display.insert(tk.END, data[:-2])
+        self.site_display.insert(tk.END, data)
         self.site_display.config(state=tk.DISABLED)
 
 
