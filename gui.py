@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 
 import tkinter as tk
-from tkinter import simpledialog as sdb
 from connect import connect as conn
 from parser import parser
 import time
@@ -11,7 +10,6 @@ import os.path
 from io import BytesIO
 from PIL import Image, ImageTk
 import webbrowser as wb
-from urllib import parse as url_encode
 
 class GUI:
     def __init__(self):
@@ -180,16 +178,6 @@ class GUI:
 
 
     def execute_address(self, url):
-        # if parsed_url['type'] == '7':
-        #     # self.send_to_screen(parsed_url, parsed_url['type'])
-        #     terms = sdb.askstring('Search','Please enter your search terms...')
-        #     print(terms)
-        #     if terms:
-        #         self.parser.resource = "{}\t{}".format(self.parser.resource,terms)
-        #         print(self.parser.resource)
-        #     else:
-        #         return False
-
         response = self.conn.request(url['resource'], url['host'], url['type'], url['port'])
 
         if not response:
