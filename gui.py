@@ -11,6 +11,7 @@ import os.path
 from io import BytesIO
 from PIL import Image, ImageTk
 import webbrowser as wb
+from urllib import parse as url_encode
 
 class GUI:
     def __init__(self):
@@ -21,6 +22,7 @@ class GUI:
         self.read_config()
         self.conn = conn()
         self.parser = parser()
+        self.search = None
 
         #colors
         self.FG = '#E0E2E4'
@@ -148,17 +150,18 @@ class GUI:
             else:
                 return False #error handling goes here
 
-        if parsed_url['type'] == 7:
+        self.populate_url_bar(url)
+
+        if history:
+            self.add_to_history(url)
+
+        if parsed_url['type'] == '7':
+            self.show_search()
             return False # display search
         else:
             data = self.execute_address(parsed_url)
             if not data:
                 return False #error handling goes here
-
-        self.populate_url_bar(url)
-
-        if history:
-            self.add_to_history(url)
 
         self.send_to_screen(self.conn.raw_response,self.conn.filetype)
 
@@ -227,7 +230,7 @@ class GUI:
             data = f.read()
         self.entry_url.delete(0, tk.END)
         self.entry_url.insert(tk.END, 'home')
-        if event is not False:
+        if event:
             self.add_to_history('home')
         self.send_to_screen(data, '1')
 
@@ -257,6 +260,28 @@ class GUI:
         header = 'i#############\tfalse\tnull.host\t1\r\ni  manually edit in go.config.json\tfalse\tnull.host\t1\r\n or add using the favorites button\tfalse\tnull.host\t1\r\ni\tfalse\tnull.host\t1\r\n'
         #soon add code to load in favorites here
         self.send_to_screen(data=header, clear=False)
+
+    def show_search(self):
+        text1 = ' __   ___       __   __\n/__` |__   /\  |__) /  ` |__|\n.__/ |___ /~~\ |  \ \__, |  |\n\n\nPlease enter your search terms and press the enter key:\n\n'
+        self.search = tk.Entry(width='50')
+        self.search.bind('<Return>', self.query_search_engine)
+        self.site_display.config(state=tk.NORMAL)
+        self.site_display.delete(1.0, tk.END)
+        self.site_display.insert(tk.END,text1)
+        self.site_display.window_create(tk.END,window=self.search)
+        self.site_display.config(state=tk.DISABLED)
+
+
+    def query_search_engine(self, event):
+        base_url = self.entry_url.get()
+        base_url = base_url.replace('/7/','/1/',1)
+        query = self.search.get()
+        url = '{}\t{}'.format(base_url,query)
+        self.populate_url_bar(url)
+        self.handle_request(False, url)
+        self.search = None
+
+
 
     def show_menu(self, data, clear=True):
         if not data:
