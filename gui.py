@@ -218,7 +218,6 @@ class GUI:
     def load_home_screen(self,event=False):
         with open('./home.gopher','r') as f:
             data = f.read()
-            print(data)
         self.entry_url.delete(0, tk.END)
         self.entry_url.insert(tk.END, 'home')
         if event:
