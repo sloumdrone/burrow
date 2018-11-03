@@ -143,7 +143,9 @@ class GUI:
     # ------------Start navigation methods----------------------------
 
     def handle_request(self,event=False, url=False, history=True):
+        url = url if url else self.entry_url.get()
         parsed_url = self.parse_url(url)
+
         if not parsed_url:
             if url == 'home':
                 return self.load_home_screen(history)
@@ -166,9 +168,7 @@ class GUI:
         self.send_to_screen(self.conn.raw_response,self.conn.filetype)
 
 
-    def parse_url(self, url=False, history=True):
-        url = url if url else self.entry_url.get()
-
+    def parse_url(self, url=False):
         parsed_url = self.parser.parse_url(url)
 
         if not parsed_url:
