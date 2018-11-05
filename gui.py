@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import tkinter as tk
+from tkinter import ttk
 import tkinter.simpledialog as dialog
 from connect import connect as conn
 from parser import parser
@@ -71,6 +72,7 @@ class GUI:
 
         #status bar objects
         self.status_info = tk.Label(self.status_bar, textvariable=self.message_bar_content, bg=self.STATUS_BG, takefocus=0, fg=self.ACTIVELINK)
+
 
         self.pack_geometry()
         self.add_status_titles()
@@ -143,6 +145,11 @@ class GUI:
     # ------------Start navigation methods----------------------------
 
     def handle_request(self,event=False, url=False, history=True):
+        self.progress_bar = ttk.Progressbar(self.entry_url, orient="horizontal", length=130, mode='indeterminate')
+        self.progress_bar.pack(side=tk.RIGHT, padx=(0,10))
+        self.progress_bar.start(10)
+        self.progress_bar.update_idletasks()
+
         url = url if url else self.entry_url.get()
         parsed_url = self.parse_url(url)
 
@@ -268,7 +275,7 @@ class GUI:
             entry = '{}{}\t{}\t{}\t{}\n'.format(url['type'], x['name'], url['resource'], url['host'], url['port'])
             header += entry
         return header
-        # self.send_to_screen(data=header, clear=False)
+
 
     def show_search(self):
         text1 = ' __   ___       __   __\n/__` |__   /\  |__) /  ` |__|\n.__/ |___ /~~\ |  \ \__, |  |\n\n\nPlease enter your search terms and press the enter key:\n\n'
@@ -279,6 +286,7 @@ class GUI:
         self.site_display.insert(tk.END,text1)
         self.site_display.window_create(tk.END,window=self.search)
         self.site_display.config(state=tk.DISABLED)
+        self.search.focus_set()
 
 
     def query_search_engine(self, event):
@@ -289,7 +297,6 @@ class GUI:
         self.populate_url_bar(url)
         self.handle_request(False, url)
         self.search = None
-
 
 
     def show_menu(self, data, clear=True):
@@ -349,7 +356,6 @@ class GUI:
                 link_count += 1
 
         self.site_display.config(state=tk.DISABLED)
-
         return True
 
 
@@ -379,6 +385,10 @@ class GUI:
         elif itemtype in ['p','I','g']:
             self.show_image(data)
 
+        try:
+            self.progress_bar.destroy()
+        except:
+            pass
 
     def update_status(self, event, href=False):
         if href:
