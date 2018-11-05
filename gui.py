@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 
 import tkinter as tk
-from tkinter import ttk
 import tkinter.simpledialog as dialog
 from connect import connect as conn
 from parser import parser
@@ -145,9 +144,8 @@ class GUI:
     # ------------Start navigation methods----------------------------
 
     def handle_request(self,event=False, url=False, history=True):
-        self.progress_bar = ttk.Progressbar(self.entry_url, orient="horizontal", length=130, mode='indeterminate')
+        self.progress_bar = tk.Label(self.entry_url, text=' Loading... ', width=12, relief=tk.FLAT, height=1, fg='#FFFFFF', bg=self.TYPES)
         self.progress_bar.pack(side=tk.RIGHT, padx=(0,10))
-        self.progress_bar.start(10)
         self.progress_bar.update_idletasks()
 
         url = url if url else self.entry_url.get()
@@ -173,6 +171,7 @@ class GUI:
                 return False #error handling goes here
 
         self.send_to_screen(self.conn.raw_response,self.conn.filetype)
+
 
 
     def parse_url(self, url=False):
