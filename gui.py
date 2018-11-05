@@ -144,9 +144,9 @@ class GUI:
     # ------------Start navigation methods----------------------------
 
     def handle_request(self,event=False, url=False, history=True):
-        self.progress_bar = tk.Label(self.entry_url, text=' Loading... ', width=12, relief=tk.FLAT, height=1, fg='#FFFFFF', bg=self.TYPES)
-        self.progress_bar.pack(side=tk.RIGHT, padx=(0,10))
-        self.progress_bar.update_idletasks()
+        self.loading_bar = tk.Label(self.entry_url, text=' Loading... ', width=12, relief=tk.FLAT, height=1, fg='#FFFFFF', bg=self.TYPES)
+        self.loading_bar.pack(side=tk.RIGHT, padx=(0,10))
+        self.loading_bar.update_idletasks()
 
         url = url if url else self.entry_url.get()
         parsed_url = self.parse_url(url)
@@ -170,7 +170,7 @@ class GUI:
             if not data:
                 return False #error handling goes here
 
-        self.send_to_screen(self.conn.raw_response,self.conn.filetype)
+        self.send_to_screen(data['body'],data['type'])
 
 
 
@@ -197,8 +197,7 @@ class GUI:
         self.site_display.focus_set()
         self.config["last_viewed"] = url
 
-        self.send_to_screen(self.conn.raw_response, self.conn.filetype)
-        return True
+        return response
 
 
     def add_to_history(self, url):
@@ -287,6 +286,12 @@ class GUI:
         self.site_display.config(state=tk.DISABLED)
         self.search.focus_set()
 
+        try:
+            self.loading_bar.destroy()
+        except:
+            pass
+
+
 
     def query_search_engine(self, event):
         base_url = self.entry_url.get()
@@ -324,7 +329,7 @@ class GUI:
 
         link_count = 0
 
-        for x in data[1:]:
+        for x in data:
             if x['type'] == 'i':
                 self.site_display.insert(tk.END,'        \t\t{}\n'.format(x['description']))
             elif x['type'] == '3':
@@ -359,7 +364,7 @@ class GUI:
 
 
     def show_text(self, data):
-        if data[-2:] == '\n.':
+        if data[-2:] == '.\n':
             data = data[:-2]
         self.site_display.config(state=tk.NORMAL)
         self.site_display.delete(1.0, tk.END)
@@ -385,7 +390,7 @@ class GUI:
             self.show_image(data)
 
         try:
-            self.progress_bar.destroy()
+            self.loading_bar.destroy()
         except:
             pass
 
