@@ -45,7 +45,11 @@ class GUI:
         #create and configure root window
         self.root = tk.Tk(className='Burrow')
         self.root.title('Burrow')
-        self.root.geometry("1200x800")
+        sh = self.root.winfo_screenheight()
+        sw = self.root.winfo_screenwidth()
+        w = int(sw * 0.7)
+        h = sh - 200
+        self.root.geometry("{}x{}+{}+{}".format(w, h, sw//2-w//2, 50))
         self.add_assets()
 
         #main frame objects
@@ -227,8 +231,9 @@ class GUI:
         self.entry_url.insert(tk.END, 'home')
         if event:
             self.add_to_history('home')
-        data += self.load_favorites()
-        self.send_to_screen(data, '1')
+        data2 = self.load_favorites()
+        link_count = self.send_to_screen(data, '1', True)
+        self.send_to_screen(data2, '1', False, link_count)
 
 
     def go_back(self, event):
@@ -303,7 +308,7 @@ class GUI:
         self.search = None
 
 
-    def show_menu(self, data, clear=True):
+    def show_menu(self, data, clear=True, links=0):
         if not data:
             #error handling will go here
             return False
@@ -327,7 +332,7 @@ class GUI:
         if clear:
             self.site_display.delete(1.0, tk.END)
 
-        link_count = 0
+        link_count = links
 
         for x in data:
             if x['type'] == 'i':
@@ -349,18 +354,25 @@ class GUI:
                 tag_name = 'link{}'.format(link_count)
                 callback = (lambda event, href=link, tag_name=tag_name: self.gotolink(event, href, tag_name))
                 hover = (lambda event, href=link, tag_name=tag_name: self.hoverlink(event, href, tag_name))
+                favorite = [x for x in self.config['favorites'] if x['url'] == link]
                 clear = (lambda event, tag_name=tag_name: self.clear_status(event, tag_name))
                 self.site_display.tag_bind(tag_name, "<Button-1>", callback)
                 self.site_display.tag_bind(tag_name, "<Enter>", hover)
                 self.site_display.tag_bind(tag_name, '<Leave>', clear)
                 self.site_display.insert(tk.END, types[x['type']], ('type_tag',))
                 self.site_display.insert(tk.END,'\t\t')
-                self.site_display.insert(tk.END, x['description'], (tag_name,'linkcolor'))
+                if favorite:
+                    tag_name_f = 'favorite{}'.format(link_count)
+                    callback_f = (lambda event, href=link: self.remove_favorite(event, href))
+                    self.site_display.tag_bind(tag_name_f, '<Button-3>', callback_f)
+                    self.site_display.insert(tk.END, x['description'], (tag_name, tag_name_f, 'linkcolor'))
+                else:
+                    self.site_display.insert(tk.END, x['description'], (tag_name,'linkcolor'))
                 self.site_display.insert(tk.END, '\n')
                 link_count += 1
 
         self.site_display.config(state=tk.DISABLED)
-        return True
+        return link_count
 
 
     def show_text(self, data):
@@ -380,12 +392,13 @@ class GUI:
         self.site_display.config(state=tk.DISABLED)
 
 
-    def send_to_screen(self, data, itemtype='1', clear=True):
+    def send_to_screen(self, data, itemtype='1', clear=True, link_count=0):
         if itemtype == '0':
             self.show_text(data)
         elif itemtype in ['1','3','7']:
             data = self.parser.parse_menu(data)
-            self.show_menu(data, clear)
+            links = self.show_menu(data, clear, link_count)
+            return links
         elif itemtype in ['p','I','g']:
             self.show_image(data)
 
@@ -457,6 +470,17 @@ class GUI:
         self.write_config(self.config)
         self.root.destroy()
 
+
+    def remove_favorite(self, event, href):
+        print('remove!')
+        index = None
+        for ind, val in enumerate(self.config['favorites']):
+            if val['url'] == href:
+                index = ind
+                break
+        if index is not None:
+            self.config['favorites'].pop(index)
+        self.load_home_screen()
 
 
 if __name__ == '__main__':
