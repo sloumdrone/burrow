@@ -17,7 +17,7 @@ class GUI:
         self.history = []
         self.history_location = -1
         self.message_bar_content = ''
-        self.config = None
+        # self.config = None
         self.read_config()
         self.conn = conn()
         self.parser = parser()
@@ -45,7 +45,11 @@ class GUI:
         #create and configure root window
         self.root = tk.Tk(className='Burrow')
         self.root.title('Burrow')
-        self.root.geometry("1200x800")
+        sh = self.root.winfo_screenheight()
+        sw = self.root.winfo_screenwidth()
+        w = int(sw * 0.7)
+        h = sh - 200
+        self.root.geometry("{}x{}+{}+{}".format(w, h, sw//2-w//2, 50))
         self.add_assets()
 
         #main frame objects
@@ -71,6 +75,10 @@ class GUI:
 
         #status bar objects
         self.status_info = tk.Label(self.status_bar, textvariable=self.message_bar_content, bg=self.STATUS_BG, takefocus=0, fg=self.ACTIVELINK)
+
+        #menu objects
+        self.fave_context = tk.Menu(self.body, tearoff=0)
+
 
         self.pack_geometry()
         self.add_status_titles()
@@ -140,9 +148,21 @@ class GUI:
         self.message_bar_content.set('Ready.')
 
 
+    def show_fave_context(self, e, href):
+        if self.fave_context.type(0):
+            self.fave_context.delete(0)
+        delete_favorite = (lambda event=e, link=href: self.remove_favorite(event, link))
+        self.fave_context.add_command(label="Remove favorite", command=delete_favorite)
+        self.fave_context.tk_popup(e.x_root, e.y_root)
+
+
     # ------------Start navigation methods----------------------------
 
     def handle_request(self,event=False, url=False, history=True):
+        self.loading_bar = tk.Label(self.entry_url, text=' Loading... ', width=12, relief=tk.FLAT, height=1, fg='#FFFFFF', bg=self.TYPES)
+        self.loading_bar.pack(side=tk.RIGHT, padx=(0,10))
+        self.loading_bar.update_idletasks()
+
         url = url if url else self.entry_url.get()
         parsed_url = self.parse_url(url)
 
@@ -165,7 +185,8 @@ class GUI:
             if not data:
                 return False #error handling goes here
 
-        self.send_to_screen(self.conn.raw_response,self.conn.filetype)
+        self.send_to_screen(data['body'],data['type'])
+
 
 
     def parse_url(self, url=False):
@@ -191,8 +212,7 @@ class GUI:
         self.site_display.focus_set()
         self.config["last_viewed"] = url
 
-        self.send_to_screen(self.conn.raw_response, self.conn.filetype)
-        return True
+        return response
 
 
     def add_to_history(self, url):
@@ -222,8 +242,9 @@ class GUI:
         self.entry_url.insert(tk.END, 'home')
         if event:
             self.add_to_history('home')
-        data += self.load_favorites()
-        self.send_to_screen(data, '1')
+        data2 = self.load_favorites()
+        link_count = self.send_to_screen(data, '1', True)
+        self.send_to_screen(data2, '1', False)
 
 
     def go_back(self, event):
@@ -268,7 +289,7 @@ class GUI:
             entry = '{}{}\t{}\t{}\t{}\n'.format(url['type'], x['name'], url['resource'], url['host'], url['port'])
             header += entry
         return header
-        # self.send_to_screen(data=header, clear=False)
+
 
     def show_search(self):
         text1 = ' __   ___       __   __\n/__` |__   /\  |__) /  ` |__|\n.__/ |___ /~~\ |  \ \__, |  |\n\n\nPlease enter your search terms and press the enter key:\n\n'
@@ -279,6 +300,13 @@ class GUI:
         self.site_display.insert(tk.END,text1)
         self.site_display.window_create(tk.END,window=self.search)
         self.site_display.config(state=tk.DISABLED)
+        self.search.focus_set()
+
+        try:
+            self.loading_bar.destroy()
+        except:
+            pass
+
 
 
     def query_search_engine(self, event):
@@ -289,7 +317,6 @@ class GUI:
         self.populate_url_bar(url)
         self.handle_request(False, url)
         self.search = None
-
 
 
     def show_menu(self, data, clear=True):
@@ -316,9 +343,10 @@ class GUI:
         if clear:
             self.site_display.delete(1.0, tk.END)
 
-        link_count = 0
+        if clear:
+            self.link_count = 0
 
-        for x in data[1:]:
+        for x in data:
             if x['type'] == 'i':
                 self.site_display.insert(tk.END,'        \t\t{}\n'.format(x['description']))
             elif x['type'] == '3':
@@ -335,26 +363,32 @@ class GUI:
                 else:
                     link = 'gopher://{}{}/{}{}'.format(x['host'], x['port'], x['type'], x['resource'])
 
-                tag_name = 'link{}'.format(link_count)
+                tag_name = 'link{}'.format(self.link_count)
                 callback = (lambda event, href=link, tag_name=tag_name: self.gotolink(event, href, tag_name))
                 hover = (lambda event, href=link, tag_name=tag_name: self.hoverlink(event, href, tag_name))
+                favorite = [x for x in self.config['favorites'] if x['url'] == link]
                 clear = (lambda event, tag_name=tag_name: self.clear_status(event, tag_name))
                 self.site_display.tag_bind(tag_name, "<Button-1>", callback)
                 self.site_display.tag_bind(tag_name, "<Enter>", hover)
                 self.site_display.tag_bind(tag_name, '<Leave>', clear)
                 self.site_display.insert(tk.END, types[x['type']], ('type_tag',))
                 self.site_display.insert(tk.END,'\t\t')
-                self.site_display.insert(tk.END, x['description'], (tag_name,'linkcolor'))
+                if favorite:
+                    tag_name_f = 'favorite{}'.format(self.link_count)
+                    callback_f = (lambda event, href=link: self.show_fave_context(event, href))
+                    self.site_display.tag_bind(tag_name_f, '<Button-3>', callback_f)
+                    self.site_display.insert(tk.END, x['description'], (tag_name, tag_name_f, 'linkcolor'))
+                else:
+                    self.site_display.insert(tk.END, x['description'], (tag_name,'linkcolor'))
                 self.site_display.insert(tk.END, '\n')
-                link_count += 1
+                self.link_count += 1
 
         self.site_display.config(state=tk.DISABLED)
-
-        return True
+        return self.link_count
 
 
     def show_text(self, data):
-        if data[-2:] == '\n.':
+        if data[-2:] == '.\n':
             data = data[:-2]
         self.site_display.config(state=tk.NORMAL)
         self.site_display.delete(1.0, tk.END)
@@ -379,6 +413,10 @@ class GUI:
         elif itemtype in ['p','I','g']:
             self.show_image(data)
 
+        try:
+            self.loading_bar.destroy()
+        except:
+            pass
 
     def update_status(self, event, href=False):
         if href:
@@ -443,6 +481,16 @@ class GUI:
         self.write_config(self.config)
         self.root.destroy()
 
+
+    def remove_favorite(self, event, href):
+        index = None
+        for ind, val in enumerate(self.config['favorites']):
+            if val['url'] == href:
+                index = ind
+                break
+        if index is not None:
+            self.config['favorites'].pop(index)
+        self.load_home_screen()
 
 
 if __name__ == '__main__':
