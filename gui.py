@@ -30,18 +30,21 @@ class GUI:
         self.FLINK = '#93C763'
         self.ACTIVELINK = '#678CB1'
         self.HLB = '#804000'
-        self.HLF = '#E0E2E4'
+        self.HLF = self.FG
         self.STATUS_BG = '#293134'
         self.STATUS_FG = '#FFCD22'
         self.ERROR = '#EC7600'
-        self.BAR_BG = '#293134'
-        self.BAR_FG = '#2F393C'
-        self.BAR_HLB = '#804000'
-        self.BAR_HLF = '#E0E2E4'
-        self.BAR_SLOT = '#E0E2E4'
+        self.BAR_BG = self.STATUS_BG
+        self.BAR_FG = self.BG
+        self.BAR_HLB = self.HLB
+        self.BAR_HLF = self.FG
+        self.BAR_SLOT = self.FG
         self.SCROLL = '#434A57'
         self.TYPES = '#A082BD'
-
+        self.MENU_BG = self.BAR_BG
+        self.MENU_FG = self.FG
+        self.MENU_HLB = self.LINK
+        self.MENU_HLF = self.BAR_BG
 
         #create and configure root window
         self.root = tk.Tk(className='Burrow')
@@ -80,7 +83,7 @@ class GUI:
         self.status_info = tk.Label(self.status_bar, textvariable=self.message_bar_content, bg=self.STATUS_BG, takefocus=0, fg=self.ACTIVELINK)
 
         #menu objects
-        self.context_menu = tk.Menu(self.body, tearoff=0)
+        self.context_menu = tk.Menu(self.body, tearoff=0, bg=self.MENU_BG, fg=self.MENU_FG, activebackground=self.MENU_HLB, activeforeground=self.MENU_HLF, activeborderwidth=0)
 
 
         self.pack_geometry()
@@ -106,15 +109,17 @@ class GUI:
             x.bind('<Leave>', self.clear_status)
             x.config(activebackground=self.BG)
         self.entry_url.bind('<Return>', self.handle_request)
-        self.btn_back.bind('<Button-1>', self.go_back)
-        self.btn_forward.bind('<Button-1>', self.go_forward)
-        self.btn_home.bind('<Button-1>', self.load_home_screen)
+        self.btn_back.bind('<ButtonRelease-1>', self.go_back)
+        self.btn_forward.bind('<ButtonRelease-1>', self.go_forward)
+        self.btn_home.bind('<ButtonRelease-1>', self.load_home_screen)
         self.site_display.bind("<Up>", lambda event: self.site_display.yview_scroll(-1, 'units'))
         self.site_display.bind("<Down>", lambda event: self.site_display.yview_scroll(1, 'units'))
         self.site_display.bind("<Button-1>", lambda event: self.site_display.focus_set())
         self.entry_url.bind("<Button-1>", lambda event: self.entry_url.focus_set())
         self.root.protocol('WM_DELETE_WINDOW', self.close_window)
         self.btn_favorite.bind("<Button-1>", self.add_to_favorites)
+        self.site_display.tag_bind('generic_r_click', "<Button-3>", (lambda event, href=None: self.show_context_menu(event, href)))
+
 
 
     def pack_geometry(self):
@@ -151,20 +156,37 @@ class GUI:
         self.message_bar_content.set('Ready.')
 
 
-    def show_context_menu(self, e, href):
+    def show_context_menu(self, e, href=None):
         self.context_menu.delete(0,20)
-        copy_link = (lambda link=href: self.copy_to_clipboard(link))
-        self.context_menu.add_command(label="Copy link to clipboard", command=copy_link)
-        if self.is_favorite(href):
-            delete_favorite = (lambda event=e, link=href: self.remove_favorite(event, link))
-            self.context_menu.add_command(label="Remove favorite", command=delete_favorite)
-        else:
-            add_favorite = (lambda event=e, link=href: self.add_to_favorites(event, link))
-            self.context_menu.add_command(label="Add to favorites", command=add_favorite)
+        #add navigation options
+        if len(self.history) > 1 or self.history_location > 0:
+            back = (lambda event=e: self.go_back(event))
+            self.context_menu.add_command(label="Back", command=back)
+        if len(self.history) > 1 or self.history_location < len(self.history) - 2:
+            forward = (lambda event=e: self.go_forward(event))
+            self.context_menu.add_command(label="Forward", command=forward)
+        if self.entry_url.get() != 'home':
+            home = (lambda event=e: self.load_home_screen(event))
+            self.context_menu.add_command(label="Home", command=home)
+
+
+        if href:
+            copy_link = (lambda link=href: self.copy_to_clipboard(link))
+            self.context_menu.add_command(label="Copy URL to clipboard", command=copy_link)
+
+            self.context_menu.add_separator()
+            if self.is_favorite(href):
+                delete_favorite = (lambda event=e, link=href: self.remove_favorite(event, link))
+                self.context_menu.add_command(label="Delete from favorites", command=delete_favorite)
+                rename_favorite = (lambda event=e, link=href: self.rename_favorite(event, link))
+                self.context_menu.add_command(label="Rename this favorite", command=rename_favorite)
+            elif href:
+                add_favorite = (lambda event=e, link=href: self.add_to_favorites(event, link))
+                self.context_menu.add_command(label="Add to favorites", command=add_favorite)
         self.context_menu.tk_popup(e.x_root, e.y_root)
 
 
-    def copy_to_clipboard(self, test):
+    def copy_to_clipboard(self, text):
         self.root.clipboard_clear()
         self.root.clipboard_append(text)
 
@@ -184,7 +206,6 @@ class GUI:
                 return self.load_home_screen(history)
             else:
                 data = {'type': '3', 'body': '3ERROR: Improperly formatted URL\tfalse\tnull.host\t1\n'}
-                print('Error parsing url')
                 return False #error handling goes here
 
         self.populate_url_bar(url)
@@ -210,8 +231,6 @@ class GUI:
         parsed_url = self.parser.parse_url(url)
 
         if not parsed_url:
-            # send error to screen
-            print('Error parsing URL')
             return False
 
         return parsed_url
@@ -281,20 +300,6 @@ class GUI:
         href = self.history[self.history_location]
         self.handle_request(False, href, False)
 
-
-    def add_to_favorites(self, event, url=None):
-        favorite_name = dialog.askstring("Add to favorites", "What would you like to title this favorite?")
-        reload_home = True
-        if url is None:
-            url = self.entry_url.get()
-            reload_home = False
-        if not favorite_name or not url:
-            return False
-        favorite = {"url": url, "name": favorite_name}
-        self.config["favorites"].append(favorite)
-        self.write_config(self.config)
-        if reload_home:
-            self.load_home_screen()
 
 
 
@@ -370,9 +375,9 @@ class GUI:
 
         for x in data:
             if x['type'] == 'i':
-                self.site_display.insert(tk.END,'        \t\t{}\n'.format(x['description']))
+                self.site_display.insert(tk.END,'        \t\t{}\n'.format(x['description']), ('generic_r_click'))
             elif x['type'] == '3':
-                self.site_display.insert(tk.END,'        \t\t{}\n'.format(x['description']))
+                self.site_display.insert(tk.END,'        \t\t{}\n'.format(x['description']), ('generic_r_click'))
             elif x['type'] in types:
                 # adapted from:
                 # https://stackoverflow.com/questions/27760561/tkinter-and-hyperlinks
@@ -406,7 +411,6 @@ class GUI:
                 self.site_display.insert(tk.END, x['description'], (tag_name,styletag))
                 self.site_display.insert(tk.END, '\n')
                 self.link_count += 1
-
         self.site_display.config(state=tk.DISABLED)
         return self.link_count
 
@@ -514,6 +518,24 @@ class GUI:
         return False
 
 
+    def rename_favorite(self, event, link):
+        index = None
+        for ind, val in enumerate(self.config['favorites']):
+            if val['url'] == link:
+                index = ind
+                break
+        if index is not None:
+            title = self.config['favorites'][index]['name']
+            new_name = dialog.askstring("Rename favorite","\n     Change favorite name to:     \n".format(title), initialvalue=title)
+            if new_name:
+                self.config['favorites'][index]['name'] = new_name
+                self.write_config(self.config)
+                if self.entry_url.get() == 'home':
+                    self.load_home_screen()
+                return True
+        return False
+
+
     def remove_favorite(self, event, href):
         index = None
         for ind, val in enumerate(self.config['favorites']):
@@ -522,7 +544,22 @@ class GUI:
                 break
         if index is not None:
             self.config['favorites'].pop(index)
+            self.write_config(self.config)
         self.load_home_screen()
+
+
+    def add_to_favorites(self, event, url=None):
+        favorite_name = dialog.askstring("Add to favorites", "What would you like to title this favorite?")
+        if url is None:
+            url = self.entry_url.get()
+        if not favorite_name or not url:
+            return False
+        favorite = {"url": url, "name": favorite_name}
+        self.config["favorites"].append(favorite)
+        self.write_config(self.config)
+        if self.entry_url.get() == 'home':
+            self.load_home_screen()
+        return True
 
 
 if __name__ == '__main__':
