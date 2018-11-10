@@ -18,7 +18,7 @@ class parser:
         if url == 'home':
             return False
 
-        regex = r'^(?P<protocol>(?:(gopher|http):\/\/)?)?(?P<host>[\w\.\d]+)(?P<port>(?::\d+)?)?(?P<type>(?:\/[\dgIp])?)?(?P<resource>(?:\/.*)?)?$'
+        regex = r'^(?P<protocol>(?:(gopher|http):\/\/)?)?(?P<host>[\w\-\.\d]+)(?P<port>(?::\d+)?)?(?P<type>(?:\/[\dgIp])?)?(?P<resource>(?:\/.*)?)?$'
 
         match = re.match(regex, url)
 

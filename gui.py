@@ -27,12 +27,13 @@ class GUI:
         self.FG = '#E0E2E4'
         self.BG = '#2F393C'
         self.LINK = '#E8E2B7'
+        self.FLINK = '#93C763'
         self.ACTIVELINK = '#678CB1'
         self.HLB = '#804000'
         self.HLF = '#E0E2E4'
         self.STATUS_BG = '#293134'
         self.STATUS_FG = '#FFCD22'
-        self.ERROR = '#E8E2B7'
+        self.ERROR = '#EC7600'
         self.BAR_BG = '#293134'
         self.BAR_FG = '#2F393C'
         self.BAR_HLB = '#804000'
@@ -70,6 +71,8 @@ class GUI:
         self.site_display = tk.Text(self.body, bg=self.BG, foreground=self.FG, padx=20, pady=20, wrap=tk.WORD, state=tk.DISABLED, spacing2=2, spacing1=2, spacing3=2,  yscrollcommand=self.scroll_bar.set, highlightcolor=self.BG, highlightbackground=self.BAR_BG, relief=tk.FLAT)
         self.scroll_bar.config(command=self.site_display.yview, width=20, relief=tk.RIDGE)
         self.site_display.tag_configure('linkcolor', foreground=self.LINK, spacing1=5, spacing2=5, spacing3=5)
+        self.site_display.tag_configure('favoritecolor', foreground=self.FLINK, spacing1=5, spacing2=5, spacing3=5)
+
         self.site_display.tag_configure('type_tag', background=self.BG, foreground=self.TYPES, spacing2=1, spacing1=1, spacing3=1)
         self.site_display.tag_configure('error_text', foreground=self.ERROR, spacing1=5, spacing2=5, spacing3=5)
 
@@ -77,7 +80,7 @@ class GUI:
         self.status_info = tk.Label(self.status_bar, textvariable=self.message_bar_content, bg=self.STATUS_BG, takefocus=0, fg=self.ACTIVELINK)
 
         #menu objects
-        self.fave_context = tk.Menu(self.body, tearoff=0)
+        self.context_menu = tk.Menu(self.body, tearoff=0)
 
 
         self.pack_geometry()
@@ -148,12 +151,22 @@ class GUI:
         self.message_bar_content.set('Ready.')
 
 
-    def show_fave_context(self, e, href):
-        if self.fave_context.type(0):
-            self.fave_context.delete(0)
-        delete_favorite = (lambda event=e, link=href: self.remove_favorite(event, link))
-        self.fave_context.add_command(label="Remove favorite", command=delete_favorite)
-        self.fave_context.tk_popup(e.x_root, e.y_root)
+    def show_context_menu(self, e, href):
+        self.context_menu.delete(0,20)
+        copy_link = (lambda link=href: self.copy_to_clipboard(link))
+        self.context_menu.add_command(label="Copy link to clipboard", command=copy_link)
+        if self.is_favorite(href):
+            delete_favorite = (lambda event=e, link=href: self.remove_favorite(event, link))
+            self.context_menu.add_command(label="Remove favorite", command=delete_favorite)
+        else:
+            add_favorite = (lambda event=e, link=href: self.add_to_favorites(event, link))
+            self.context_menu.add_command(label="Add to favorites", command=add_favorite)
+        self.context_menu.tk_popup(e.x_root, e.y_root)
+
+
+    def copy_to_clipboard(self, test):
+        self.root.clipboard_clear()
+        self.root.clipboard_append(text)
 
 
     # ------------Start navigation methods----------------------------
@@ -170,6 +183,8 @@ class GUI:
             if url == 'home':
                 return self.load_home_screen(history)
             else:
+                data = {'type': '3', 'body': '3ERROR: Improperly formatted URL\tfalse\tnull.host\t1\n'}
+                print('Error parsing url')
                 return False #error handling goes here
 
         self.populate_url_bar(url)
@@ -180,6 +195,8 @@ class GUI:
         if parsed_url['type'] == '7':
             self.show_search()
             return False # display search
+        elif not parsed_url:
+            pass
         else:
             data = self.execute_address(parsed_url)
             if not data:
@@ -265,14 +282,19 @@ class GUI:
         self.handle_request(False, href, False)
 
 
-    def add_to_favorites(self, event):
+    def add_to_favorites(self, event, url=None):
         favorite_name = dialog.askstring("Add to favorites", "What would you like to title this favorite?")
-        url = self.entry_url.get()
+        reload_home = True
+        if url is None:
+            url = self.entry_url.get()
+            reload_home = False
         if not favorite_name or not url:
             return False
         favorite = {"url": url, "name": favorite_name}
         self.config["favorites"].append(favorite)
         self.write_config(self.config)
+        if reload_home:
+            self.load_home_screen()
 
 
 
@@ -365,21 +387,23 @@ class GUI:
 
                 tag_name = 'link{}'.format(self.link_count)
                 callback = (lambda event, href=link, tag_name=tag_name: self.gotolink(event, href, tag_name))
-                hover = (lambda event, href=link, tag_name=tag_name: self.hoverlink(event, href, tag_name))
                 favorite = [x for x in self.config['favorites'] if x['url'] == link]
-                clear = (lambda event, tag_name=tag_name: self.clear_status(event, tag_name))
                 self.site_display.tag_bind(tag_name, "<Button-1>", callback)
-                self.site_display.tag_bind(tag_name, "<Enter>", hover)
-                self.site_display.tag_bind(tag_name, '<Leave>', clear)
                 self.site_display.insert(tk.END, types[x['type']], ('type_tag',))
                 self.site_display.insert(tk.END,'\t\t')
+                callback_menu = (lambda event, href=link: self.show_context_menu(event, href))
+                self.site_display.tag_bind(tag_name, '<Button-3>', callback_menu)
+
                 if favorite:
-                    tag_name_f = 'favorite{}'.format(self.link_count)
-                    callback_f = (lambda event, href=link: self.show_fave_context(event, href))
-                    self.site_display.tag_bind(tag_name_f, '<Button-3>', callback_f)
-                    self.site_display.insert(tk.END, x['description'], (tag_name, tag_name_f, 'linkcolor'))
+                    styletag = 'favoritecolor'
                 else:
-                    self.site_display.insert(tk.END, x['description'], (tag_name,'linkcolor'))
+                    styletag = 'linkcolor'
+                hover = (lambda event, href=link, tag_name=tag_name: self.hoverlink(event, href, tag_name))
+                clear = (lambda event, tag_name=tag_name: self.clear_status(event, tag_name))
+                self.site_display.tag_bind(tag_name, "<Enter>", hover)
+                self.site_display.tag_bind(tag_name, '<Leave>', clear)
+
+                self.site_display.insert(tk.END, x['description'], (tag_name,styletag))
                 self.site_display.insert(tk.END, '\n')
                 self.link_count += 1
 
@@ -418,6 +442,7 @@ class GUI:
         except:
             pass
 
+
     def update_status(self, event, href=False):
         if href:
             self.message_bar_content.set(href)
@@ -442,9 +467,10 @@ class GUI:
     def hoverlink(self, event, href, tag_name):
         self.update_status(event, href)
         e = event.widget
-        e.tag_config(tag_name, underline=1, foreground=self.LINK)
+        e.tag_config(tag_name, underline=1)
         self.site_display.config(cursor="arrow")
         e.update_idletasks()
+
 
     def build_image(self, bytes_str):
         stream = BytesIO(bytes_str)
@@ -480,6 +506,12 @@ class GUI:
     def close_window(self):
         self.write_config(self.config)
         self.root.destroy()
+
+    def is_favorite(self, href):
+        for val in self.config['favorites']:
+            if val['url'] == href:
+                return True
+        return False
 
 
     def remove_favorite(self, event, href):
