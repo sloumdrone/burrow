@@ -17,17 +17,16 @@ The following is a list of current and future Burrow features:
     - Settings button, brings up configuration menu __(non-functional)__
     - Main window, displays request data/pages/files
     - Vertical scroll bar
-    - Auto hiding of scroll bars __(non-functional)__
     - A status bar to display various information
     - Links in menu pages behave similar to http style hyperlinks
+    - Tabs __(non-functional)__
 
 - Menus, Pages, and Files
     - Menus display clickable links
     - Text files display in the viewport
     - Image files display in the viewport
-    - Right click on image allows for download __(non-functional)__
-    - Sound files __(non-functional)__
-    - Binary files __(non-functional)__
+    - Downloadable images
+    - Downloadable binaries/audio/video __(non-functional)__
     - HTML files, open in a new tab in the default web browser
     - Interactive pages/search display a search dialog and return a menu on send
 
@@ -35,7 +34,6 @@ The following is a list of current and future Burrow features:
     - Session based history for backward and forward navigation
     - Persistent favorites
     - Record of last URL visited
-    - Suggestions on URL entry based on persistent history __(non-functional)__
 
 - Application settings and menus
     - Settings menu __(non-functional)__
@@ -44,9 +42,8 @@ The following is a list of current and future Burrow features:
         - History settings
         - Files/download settings
         - Toggle load into home vs. last visited
-    - Secondary click context menus for text manipulation & file saving __(non-functional)__
-    - Page saving for offline viewing __(non-functional)__
-    - Hotkey to view page source for menus __(non-functional)__
+    - Secondary click context menus for favoriting, text manipulation, & file saving
+    - Page saving for offline viewing
     
 - Errors
     - Error warnings to user _(semi-functional)_
