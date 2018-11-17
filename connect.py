@@ -21,11 +21,11 @@ class connect:
         except socket.timeout:
             print('Socket timeout')
             socket_conn.close()
-            return {'type': '3', 'body': '3ERROR: Server request timed out\tfalse\tnull.host\t1'}
+            return {'type': '1', 'body': '3ERROR: Server request timed out\tfalse\tnull.host\t1'}
         except Exception as e:
             print('Misc socket error: ', e)
             socket_conn.close()
-            return {'type': '3', 'body': '3ERROR: Unable to communicate with remote server\tfalse\tnull.host\t1'}
+            return {'type': '1', 'body': '3ERROR: Unable to communicate with remote server\tfalse\tnull.host\t1'}
 
         try:
             self.raw_response = response.read()
