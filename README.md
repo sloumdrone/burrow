@@ -65,6 +65,12 @@ If you get a console error complaining about tkinter try the following (or equiv
     sudo apt-get install python3-tk
     sudo apt-get install python3-pil.imagetk
     
+Once the above items are installed, you should be able to run the following to get things up and running:
+    
+    python3 /path/to/burrow/burrow.py
+
+Note: Users on OSX will get an error thrown as OSX's version of Tkinter does not support PNG files. There is currently an issue open for this, if anyone wants to either convert the PNG buttons to GIFs, or use PIL to make them work with Tkinter (both are pretty easy, I just have not gotten around to it yet since I am not on a mac).
+    
 
 ## Distribution
 
