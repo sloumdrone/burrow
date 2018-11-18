@@ -2,6 +2,7 @@
 
 import tkinter as tk
 import tkinter.simpledialog as dialog
+from tkinter.filedialog import asksaveasfilename as savedialog
 from connect import connect as conn
 from parser import parser
 import time
@@ -17,7 +18,6 @@ class GUI:
         self.history = []
         self.history_location = -1
         self.message_bar_content = ''
-        # self.config = None
         self.read_config()
         self.conn = conn()
         self.parser = parser()
@@ -93,7 +93,9 @@ class GUI:
         #load the home screen
         self.load_home_screen(1)
 
+
     #-----------Start GUI configuration-----------------------
+
 
     def add_event_listeners(self):
         buttons = [
@@ -121,7 +123,6 @@ class GUI:
         self.site_display.tag_bind('generic_r_click', "<Button-3>", (lambda event, href=None: self.show_context_menu(event, href)))
 
 
-
     def pack_geometry(self):
         self.top_bar.pack(expand=False,fill=tk.BOTH,side=tk.TOP,anchor=tk.NW)
         self.top_bar.pack_propagate(False)
@@ -147,42 +148,59 @@ class GUI:
 
 
     def add_assets(self):
-        self.img_back = tk.PhotoImage(file='./images/back.png')
-        self.img_forward = tk.PhotoImage(file='./images/forward.png')
-        self.img_favorite = tk.PhotoImage(file='./images/favorite.png')
-        self.img_home = tk.PhotoImage(file='./images/home.png')
-        self.img_menu = tk.PhotoImage(file='./images/settings.png')
+        back = Image.open('./images/back.png')
+        self.img_back = ImageTk.PhotoImage(back)
+        forward = Image.open('./images/forward.png')
+        self.img_forward = ImageTk.PhotoImage(forward)
+        favorite = Image.open('./images/favorite.png')
+        self.img_favorite = ImageTk.PhotoImage(favorite)
+        home = Image.open('./images/home.png')
+        self.img_home = ImageTk.PhotoImage(home)
+        settings = Image.open('./images/settings.png')
+        self.img_menu = ImageTk.PhotoImage(settings)
         self.message_bar_content = tk.StringVar()
         self.message_bar_content.set('Ready.')
 
 
     def show_context_menu(self, e, href=None):
+        current_page = self.entry_url.get()
         self.context_menu.delete(0,20)
         #add navigation options
-        if len(self.history) > 1 or self.history_location > 0:
+        if len(self.history) > 1 and self.history_location > 0:
             back = (lambda event=e: self.go_back(event))
-            self.context_menu.add_command(label="Back", command=back)
-        if len(self.history) > 1 or self.history_location < len(self.history) - 2:
+            self.context_menu.add_command(label=" Back ", command=back)
+        else:
+            self.context_menu.add_command(label=" Back ", state=tk.DISABLED)
+        if len(self.history) > 1 and self.history_location < len(self.history) - 1:
             forward = (lambda event=e: self.go_forward(event))
-            self.context_menu.add_command(label="Forward", command=forward)
-        if self.entry_url.get() != 'home':
+            self.context_menu.add_command(label=" Forward ", command=forward)
+        else:
+            self.context_menu.add_command(label=" Forward ", state=tk.DISABLED)
+        refresh = (lambda event=e, link=current_page: self.handle_request(event, link, False))
+        self.context_menu.add_command(label=" Refresh ", command=refresh)
+        if current_page != 'home':
             home = (lambda event=e: self.load_home_screen(event))
-            self.context_menu.add_command(label="Home", command=home)
-
+            self.context_menu.add_command(label=" Home ", command=home)
+        else:
+            self.context_menu.add_command(label=" Home ", state=tk.DISABLED)
+        save_as_file = (lambda data=self.site_display.get(1.0,tk.END), url=current_page: self.write_to_file(data, url))
+        self.context_menu.add_command(label=" Save as... ", command=save_as_file)
 
         if href:
-            copy_link = (lambda link=href: self.copy_to_clipboard(link))
-            self.context_menu.add_command(label="Copy URL to clipboard", command=copy_link)
-
             self.context_menu.add_separator()
+            copy_link = (lambda link=href: self.copy_to_clipboard(link))
+            self.context_menu.add_command(label=" Copy URL to clipboard ", command=copy_link)
+
             if self.is_favorite(href):
+                self.context_menu.add_separator()
                 delete_favorite = (lambda event=e, link=href: self.remove_favorite(event, link))
-                self.context_menu.add_command(label="Delete from favorites", command=delete_favorite)
+                self.context_menu.add_command(label=" Delete from favorites ", command=delete_favorite)
                 rename_favorite = (lambda event=e, link=href: self.rename_favorite(event, link))
-                self.context_menu.add_command(label="Rename this favorite", command=rename_favorite)
+                self.context_menu.add_command(label=" Rename this favorite ", command=rename_favorite)
             elif href:
+                self.context_menu.add_separator()
                 add_favorite = (lambda event=e, link=href: self.add_to_favorites(event, link))
-                self.context_menu.add_command(label="Add to favorites", command=add_favorite)
+                self.context_menu.add_command(label=" Add to favorites ", command=add_favorite)
         self.context_menu.tk_popup(e.x_root, e.y_root)
 
 
@@ -192,6 +210,7 @@ class GUI:
 
 
     # ------------Start navigation methods----------------------------
+
 
     def handle_request(self,event=False, url=False, history=True):
         self.loading_bar = tk.Label(self.entry_url, text=' Loading... ', width=12, relief=tk.FLAT, height=1, fg='#FFFFFF', bg=self.TYPES)
@@ -224,7 +243,6 @@ class GUI:
                 return False #error handling goes here
 
         self.send_to_screen(data['body'],data['type'])
-
 
 
     def parse_url(self, url=False):
@@ -295,12 +313,9 @@ class GUI:
     def go_forward(self, event):
         if len(self.history) <= 1 or self.history_location >= len(self.history) - 1:
             return False
-
         self.history_location += 1
         href = self.history[self.history_location]
         self.handle_request(False, href, False)
-
-
 
 
     #-------------Start view methods----------------
@@ -403,6 +418,7 @@ class GUI:
                     styletag = 'favoritecolor'
                 else:
                     styletag = 'linkcolor'
+
                 hover = (lambda event, href=link, tag_name=tag_name: self.hoverlink(event, href, tag_name))
                 clear = (lambda event, tag_name=tag_name: self.clear_status(event, tag_name))
                 self.site_display.tag_bind(tag_name, "<Enter>", hover)
@@ -420,15 +436,44 @@ class GUI:
             data = data[:-2]
         self.site_display.config(state=tk.NORMAL)
         self.site_display.delete(1.0, tk.END)
-        self.site_display.insert(tk.END, data)
+        self.site_display.insert(tk.END, data, 'generic_r_click')
         self.site_display.config(state=tk.DISABLED)
 
 
     def show_image(self, data):
         self.current_image = self.build_image(data)
+        callback = (lambda event, image=data, write='wb': self.write_to_file(contents=image, event=event, write=write))
+        hover = (lambda event, href='Download this image...', tag_name='image_download': self.hoverlink(event, href, tag_name))
+        clear = (lambda event, tag_name='image_download': self.clear_status(event, tag_name))
+        self.site_display.tag_bind('image_download', "<Button-1>", callback)
+        self.site_display.tag_bind('image_download', "<Enter>", hover)
+        self.site_display.tag_bind('image_download', '<Leave>', clear)
         self.site_display.config(state=tk.NORMAL)
         self.site_display.delete(1.0, tk.END)
+        self.site_display.insert(tk.END,'Download this image',('linkcolor','image_download'))
+        self.site_display.insert(tk.END, '\n\n')
         self.site_display.image_create(tk.END, image = self.current_image)
+        self.site_display.config(state=tk.DISABLED)
+
+
+    def show_bin_download(self, data):
+        url = self.entry_url.get()
+        filename = url.rpartition('/')
+        if len(filename) > 1:
+            filename = filename[-1]
+        else:
+            filename = ''
+
+        callback = (lambda event, bindata=data, write='wb': self.write_to_file(contents=bindata, event=event, write=write))
+        hover = (lambda event, href='Download {}'.format(filename), tag_name='bin_download': self.hoverlink(event, href, tag_name))
+        clear = (lambda event, tag_name='bin_download': self.clear_status(event, tag_name))
+        self.site_display.tag_bind('bin_download', "<Button-1>", callback)
+        self.site_display.tag_bind('bin_download', "<Enter>", hover)
+        self.site_display.tag_bind('bin_download', '<Leave>', clear)
+        self.site_display.config(state=tk.NORMAL)
+        self.site_display.delete(1.0, tk.END)
+        self.site_display.insert(tk.END,'Download ')
+        self.site_display.insert(tk.END,filename,('linkcolor','bin_download'))
         self.site_display.config(state=tk.DISABLED)
 
 
@@ -440,6 +485,8 @@ class GUI:
             self.show_menu(data, clear)
         elif itemtype in ['p','I','g']:
             self.show_image(data)
+        elif itemtype in ['s','9','M','c',';','d','5']:
+            self.show_bin_download(data)
 
         try:
             self.loading_bar.destroy()
@@ -560,6 +607,23 @@ class GUI:
         if self.entry_url.get() == 'home':
             self.load_home_screen()
         return True
+
+
+    def write_to_file(self, contents=None, page_url=None, event=None, write='w'):
+        url = self.entry_url.get()
+        filetype = url.rpartition('.')
+        if len(filetype) > 1:
+            filetype = filetype[-1]
+        else:
+            filetype = 'txt'
+
+        filename = savedialog(initialdir="~/Desktop/", defaultextension='.{}'.format(filetype), title="Save As File", filetypes=((filetype,'*.{}'.format(filetype)),('all files','*.*')))
+        if not filename or filename is None or contents is None:
+            return False
+        with open(filename, write) as f:
+            f.write(contents)
+        return True
+
 
 
 if __name__ == '__main__':

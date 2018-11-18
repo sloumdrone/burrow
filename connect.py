@@ -14,10 +14,13 @@ class connect:
             socket_conn.connect((host, port))
             socket_conn.sendall((resource + '\r\n').encode('utf-8'))
 
-            if itemtype in ['I','p','g']:
-                response = socket_conn.makefile(mode = 'rb', errors = 'ignore')
-            else:
+            if itemtype in ['i','0','1','3']:
                 response = socket_conn.makefile(mode = 'r', errors = 'ignore')
+            else:
+                response = socket_conn.makefile(mode = 'rb', errors = 'ignore')
+
+            self.raw_response = response.read()
+            self.filetype = itemtype
         except socket.timeout:
             print('Socket timeout')
             socket_conn.close()
@@ -26,13 +29,6 @@ class connect:
             print('Misc socket error: ', e)
             socket_conn.close()
             return {'type': '1', 'body': '3ERROR: Unable to communicate with remote server\tfalse\tnull.host\t1'}
-
-        try:
-            self.raw_response = response.read()
-            self.filetype = itemtype
-        except UnicodeDecodeError:
-            self.raw_response = '3ERROR: Unable to decode server response\tfalse\tnull.host\t1'
-            self.filetype = '3'
 
         socket_conn.close()
 
