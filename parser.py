@@ -18,7 +18,7 @@ class parser:
         if url == 'home':
             return False
 
-        regex = r'^(?P<protocol>(?:(gopher|http):\/\/)?)?(?P<host>[\w\-\.\d]+)(?P<port>(?::\d+)?)?(?P<type>(?:\/[\dgIp])?)?(?P<resource>(?:\/.*)?)?$'
+        regex = r'^(?P<protocol>(?:(gopher|http):\/\/)?)?(?P<host>[\w\-\.\d]+)(?P<port>(?::\d+)?)?(?P<type>(?:\/[01345679gIhisp])?)?(?P<resource>(?:\/.*)?)?$'
 
         match = re.match(regex, url)
 
@@ -36,6 +36,9 @@ class parser:
 
         if not resource:
             resource = '/'
+
+        if not itemtype:
+            return False
 
 
         self.filetype = itemtype[len(itemtype) - 1] if itemtype else '1'
