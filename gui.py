@@ -148,11 +148,16 @@ class GUI:
 
 
     def add_assets(self):
-        self.img_back = tk.PhotoImage(file='./images/back.png')
-        self.img_forward = tk.PhotoImage(file='./images/forward.png')
-        self.img_favorite = tk.PhotoImage(file='./images/favorite.png')
-        self.img_home = tk.PhotoImage(file='./images/home.png')
-        self.img_menu = tk.PhotoImage(file='./images/settings.png')
+        back = Image.open('./images/back.png')
+        self.img_back = ImageTk.PhotoImage(back)
+        forward = Image.open('./images/forward.png')
+        self.img_forward = ImageTk.PhotoImage(forward)
+        favorite = Image.open('./images/favorite.png')
+        self.img_favorite = ImageTk.PhotoImage(favorite)
+        home = Image.open('./images/home.png')
+        self.img_home = ImageTk.PhotoImage(home)
+        settings = Image.open('./images/settings.png')
+        self.img_menu = ImageTk.PhotoImage(settings)
         self.message_bar_content = tk.StringVar()
         self.message_bar_content.set('Ready.')
 
