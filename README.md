@@ -1,5 +1,7 @@
 # Burrow
-A client/browser that accesses _gopherspace_. It is under current early stage development.
+A client/browser that accesses _gopherspace_. It is under current early stage development. 
+
+__NOTE:__ The current version of _Burrow_ will not run on some versions of OSX, and will look _really really_ bad on the versions that it does run on. It has not been tested on Windows. It looks and runs great on Ubuntu though, like this:
 
  ![Burrow browser](http://brianmevans.com/files/burrow_01.png "Burrow v0.1.8 main window")
 
