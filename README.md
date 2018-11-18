@@ -26,7 +26,7 @@ The following is a list of current and future Burrow features:
     - Text files display in the viewport
     - Image files display in the viewport
     - Downloadable images
-    - Downloadable binaries/audio/video __(non-functional)__
+    - Downloadable binaries/audio/video
     - HTML files, open in a new tab in the default web browser
     - Interactive pages/search display a search dialog and return a menu on send
 
