@@ -8,7 +8,7 @@ class connect:
     def request(self, resource, host, itemtype, port=70):
         #connects to server and returns list with response type and body
         socket_conn = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        socket_conn.settimeout(5.0)
+        socket_conn.settimeout(15.0)
 
         try:
             socket_conn.connect((host, port))

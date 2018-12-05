@@ -46,7 +46,7 @@ class GUI:
         self.MENU_HLB = self.LINK
         self.MENU_HLF = self.BAR_BG
 
-        #create and configure root window
+        #configure root window
         self.root = tk.Tk(className='Burrow')
         self.root.title('Burrow')
         sh = self.root.winfo_screenheight()
@@ -84,7 +84,6 @@ class GUI:
 
         #menu objects
         self.context_menu = tk.Menu(self.body, tearoff=0, bg=self.MENU_BG, fg=self.MENU_FG, activebackground=self.MENU_HLB, activeforeground=self.MENU_HLF, activeborderwidth=0)
-
 
         self.pack_geometry()
         self.add_status_titles()
@@ -209,7 +208,7 @@ class GUI:
         self.root.clipboard_append(text)
 
 
-    # ------------Start navigation methods----------------------------
+    # ------------Start navigation methods---------------------------
 
 
     def handle_request(self,event=False, url=False, history=True):
@@ -225,22 +224,25 @@ class GUI:
                 return self.load_home_screen(history)
             else:
                 data = {'type': '3', 'body': '3ERROR: Improperly formatted URL\tfalse\tnull.host\t1\n'}
-                return False #error handling goes here
+                # return False
+        elif parsed_url['protocol'] == 'http://':
+            wb.open(url,2,True)
+            self.populate_url_bar(self.history[-1])
+            self.loading_bar.destroy()
+            return False
 
         self.populate_url_bar(url)
 
         if history:
             self.add_to_history(url)
 
-        if parsed_url['type'] == '7':
+        if parsed_url and parsed_url['type'] == '7':
             self.show_search()
             return False # display search
         elif not parsed_url:
-            pass
+            data = {'type': '3', 'body': '3ERROR: Improperly formatted URL\tfalse\tnull.host\t1\n'}
         else:
             data = self.execute_address(parsed_url)
-            if not data:
-                return False #error handling goes here
 
         self.send_to_screen(data['body'],data['type'])
 
@@ -407,7 +409,8 @@ class GUI:
 
                 tag_name = 'link{}'.format(self.link_count)
                 callback = (lambda event, href=link, tag_name=tag_name: self.gotolink(event, href, tag_name))
-                favorite = [x for x in self.config['favorites'] if x['url'] == link]
+                # favorite = [x for x in self.config['favorites'] if x['url'] == link]
+                favorite = self.is_favorite(link)
                 self.site_display.tag_bind(tag_name, "<Button-1>", callback)
                 self.site_display.insert(tk.END, types[x['type']], ('type_tag',))
                 self.site_display.insert(tk.END,'\t\t')
