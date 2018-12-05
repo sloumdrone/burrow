@@ -1,7 +1,7 @@
 import re
 
 # Handles parsing gopher data:
-# URLs, Menus
+# URLs, Menus 
 
 class parser:
 
@@ -38,7 +38,7 @@ class parser:
             resource = '/'
 
         if not itemtype:
-            return False
+            itemtype = '1'
 
 
         self.filetype = itemtype[len(itemtype) - 1] if itemtype else '1'
