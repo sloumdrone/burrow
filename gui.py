@@ -71,7 +71,7 @@ class GUI:
 
         #body objects
         self.scroll_bar = tk.Scrollbar(self.body, bg=self.BAR_BG, bd=0, highlightthickness=0, troughcolor=self.BG, activebackground=self.SCROLL, activerelief=tk.RAISED)
-        self.site_display = tk.Text(self.body, bg=self.BG, foreground=self.FG, padx=20, pady=20, wrap=tk.WORD, state=tk.DISABLED, spacing2=2, spacing1=2, spacing3=2,  yscrollcommand=self.scroll_bar.set, highlightcolor=self.BG, highlightbackground=self.BAR_BG, relief=tk.FLAT)
+        self.site_display = tk.Text(self.body, bg=self.BG, foreground=self.FG, padx=20, pady=20, wrap=tk.WORD, state=tk.DISABLED, spacing2=2, spacing1=2, spacing3=2,  yscrollcommand=self.scroll_bar.set, highlightcolor=self.BG, highlightbackground=self.BAR_BG, relief=tk.FLAT, font="TkFixedFont")
         self.scroll_bar.config(command=self.site_display.yview, width=20, relief=tk.RIDGE)
         self.site_display.tag_configure('linkcolor', foreground=self.LINK, spacing1=5, spacing2=5, spacing3=5)
         self.site_display.tag_configure('favoritecolor', foreground=self.FLINK, spacing1=5, spacing2=5, spacing3=5)
