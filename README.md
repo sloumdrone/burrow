@@ -80,3 +80,8 @@ Some version of windows executable may come along as well, depending on configur
 ## Contribute
 
 To contribute, please branch off of `develop` and then submit a pull request into `develop` with any changes. As the project grows I will likely add wiki, issues, etc as the need arises and more people get involved.
+
+
+## Disambiguity
+
+There is [another project](https://github.com/jamestomasino/burrow) by the name of Burrow (that predates this one) by _jamestomasino_. It is a really cool collection of tools for managing gopher sites/projects. I definitely recommend checking it out!
