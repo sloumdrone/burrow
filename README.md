@@ -1,5 +1,7 @@
 # Burrow
-A client/browser that accesses _gopherspace_. It is under current early stage development.
+A client/browser that accesses _gopherspace_. It is under current early stage development. 
+
+__NOTE:__ The current version of _Burrow_ will not run on some versions of OSX, and will look _really really_ bad on the versions that it does run on. It has not been tested on Windows. It looks and runs great on Ubuntu though, like this:
 
  ![Burrow browser](http://brianmevans.com/files/burrow_01.png "Burrow v0.1.8 main window")
 
@@ -9,50 +11,46 @@ A client/browser that accesses _gopherspace_. It is under current early stage de
 ## Browser Features
 The following is a list of current and future Burrow features:
 
-- Tk based GUI
-    - Back button, move backwards in session history
-    - Forward button, move forward in session history
-    - Ffavorite button adds current page to favorites __(non-functional)__
-    - Home, shows favorites and is a start page
-    - An address bar, on _ENTER_ submits a request for a _gopher_ page
+- Graphical User Interface
+    - Back/Forward buttons, move about in session history
+    - Favorite button adds current page to favorites
+    - Home, shows favorites and is a start page _(configurable)_
+    - Address bar, on _ENTER_ submits a request for a _gopher_ page
     - Settings button, brings up configuration menu __(non-functional)__
-    - A display area for the requested information
-    - Scroll bar
+    - Main window, displays request data/pages/files
+    - Vertical scroll bar
     - A status bar to display various information
-- Links
-    - On hover, link destination shows in status bar
-    - On hover, link is underlined
-    - Links are colored differently from regular text _(configurable)_
-    - Link type appears next to link in noticeable coloring _(configurable)_
-    - On primary click, destination is loaded and new location replaces old location in address bar
-    - On primary click, link background changes to visually confirm click _(configurable)_
-    - Cursor is a pointer over links, while regular text is an I-beam cursor.
+    - Links in menu pages behave similar to http style hyperlinks
+    - Tabs __(non-functional)__
+
 - Menus, Pages, and Files
     - Menus display clickable links
     - Text files display in the viewport
     - Image files display in the viewport
-    - Right click on image allows for download __(non-functional)__
-    - Sound files __(non-functional)__
-    - Binary files __(non-functional)__
+    - Downloadable images
+    - Downloadable binaries/audio/video
     - HTML files, open in a new tab in the default web browser
-    - Interactive pages/search __(non-functional)__
+    - Interactive pages/search display a search dialog and return a menu on send
+
 - History
     - Session based history for backward and forward navigation
-    - Persistent favorites __(non-functional)__
-    - Suggestions on URL entry based on persistent history __(non-functional)__
+    - Persistent favorites
+    - Record of last URL visited
+
 - Application settings and menus
     - Settings menu __(non-functional)__
         - Color themes
         - Icon themes
         - History settings
         - Files/download settings
-    - Secondary click context menus for text manipulation & file saving __(non-functional)__
-    - Page saving for offline viewing __(non-functional)__
-    - Hotkey to view page source for menus __(non-functional)__
+        - Toggle load into home vs. last visited
+    - Secondary click context menus for favoriting, text manipulation, & file saving
+    - Page saving for offline viewing
+    
 - Errors
-    - Error warnings to user __(non-functional)__
-    - Error page on bad/malformed request __(non-functional)__
-    - Error display for type 3 server response __(non-functional)__
+    - Error warnings to user _(semi-functional)_
+    - Error page on bad/malformed request _(semi-functional)_
+    - Error display for type 3 server response _(semi-functional)_
 
 
 ## Installation
@@ -68,6 +66,12 @@ If you get a console error complaining about tkinter try the following (or equiv
 
     sudo apt-get install python3-tk
     sudo apt-get install python3-pil.imagetk
+    
+Once the above items are installed, you should be able to run the following to get things up and running:
+    
+    python3 /path/to/burrow/burrow.py
+
+Note: Users on OSX will get an error thrown as OSX's version of Tkinter does not support PNG files. There is currently an issue open for this, if anyone wants to either convert the PNG buttons to GIFs, or use PIL to make them work with Tkinter (both are pretty easy, I just have not gotten around to it yet since I am not on a mac).
     
 
 ## Distribution
