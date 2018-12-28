@@ -279,7 +279,8 @@ class GUI:
 
 
     def gotolink(self, event, href, tag_name):
-        if href[:4] == 'http':
+        if href.find('URL:') >= 0:
+            href = href.split('URL:')[1]
             wb.open(href, 2, True)
             return True
         element = event.widget
@@ -402,8 +403,7 @@ class GUI:
                     x['port'] = ':{}'.format(x['port'])
 
                 if x['type'] == 'h':
-                    link = '{}/{}'.format(x['host'], x['resource'])
-                    link = 'http://{}'.format(link.replace('//','/'))
+                    link = 'gopher://{}/{}'.format(x['host'], x['resource'])
                 else:
                     link = 'gopher://{}{}/{}{}'.format(x['host'], x['port'], x['type'], x['resource'])
 
