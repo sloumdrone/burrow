@@ -261,6 +261,7 @@ class GUI:
 
         if not response:
             # send error to screen
+            print('ERROR in execute address...')
             return False
 
 
@@ -402,10 +403,7 @@ class GUI:
                 if x['port'] and x['port'][0] != ':':
                     x['port'] = ':{}'.format(x['port'])
 
-                if x['type'] == 'h':
-                    link = 'gopher://{}/{}'.format(x['host'], x['resource'])
-                else:
-                    link = 'gopher://{}{}/{}{}'.format(x['host'], x['port'], x['type'], x['resource'])
+                link = 'gopher://{}{}/{}{}'.format(x['host'], x['port'], x['type'], x['resource'])
 
                 tag_name = 'link{}'.format(self.link_count)
                 callback = (lambda event, href=link, tag_name=tag_name: self.gotolink(event, href, tag_name))
@@ -481,7 +479,7 @@ class GUI:
 
 
     def send_to_screen(self, data, itemtype='1', clear=True):
-        if itemtype == '0':
+        if itemtype in ['0','h']:
             self.show_text(data)
         elif itemtype in ['1','3','7']:
             data = self.parser.parse_menu(data)
