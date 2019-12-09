@@ -13,12 +13,14 @@ The following is a list of current and future Burrow features:
 
 - Graphical User Interface
     - Back/Forward buttons, move about in session history
+        - Can also be done with vim style keys `h` and `l`
     - Favorite button adds current page to favorites
     - Home, shows favorites and is a start page _(configurable)_
     - Address bar, on _ENTER_ submits a request for a _gopher_ page
     - Settings button, brings up configuration menu __(non-functional)__
     - Main window, displays request data/pages/files
     - Vertical scroll bar
+        - Scrolling can also be done with vim style keys `j` and `k`
     - A status bar to display various information
     - Links in menu pages behave similar to http style hyperlinks
     - Tabs __(non-functional)__
@@ -89,3 +91,8 @@ To contribute, please branch off of `develop` and then submit a pull request int
 ## Disambiguity
 
 There is [another project](https://github.com/jamestomasino/burrow) by the name of Burrow (that predates this one) by _jamestomasino_. It is a really cool collection of tools for managing gopher sites/projects. I definitely recommend checking it out!
+
+
+## Related
+
+Interested in gopher clients but want one for your terminal? Try my main, and currently very supported client, [bombadillo](https://tildegit.org/sloum/bombadillo) (it supports: gopher, gemini, finger, local files, telnet, and the web. That last one via integration with lynx, w3m, or elinks).
